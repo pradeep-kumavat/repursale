@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <h3 className="text-xl font-semibold mb-4 text-white">Create Purchase Invoice</h3>
               <p className="text-gray-300">Quickly create purchase invoices for your suppliers.</p>
               <Link
-                href="/dashboard/purchase-invoice"
+                href="/purchase"
                 className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 Create Now
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <h3 className="text-xl font-semibold mb-4 text-white">Create Sales Invoice</h3>
               <p className="text-gray-300">Create sales invoices for your customers.</p>
               <Link
-                href="/dashboard/sales-invoice"
+                href="/sales"
                 className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 Create Now
@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <h3 className="text-xl font-semibold mb-4 text-white">Manage Inventory</h3>
               <p className="text-gray-300">Track and manage your inventory efficiently.</p>
               <Link
-                href="/dashboard/inventory"
+                href="/inventory"
                 className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 Manage Now
@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <h3 className="text-xl font-semibold mb-4 text-white">View Reports</h3>
               <p className="text-gray-300">Analyze reports for sales, purchases, and inventory.</p>
               <Link
-                href="/dashboard/reports"
+                href="/reports"
                 className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
                 View Reports

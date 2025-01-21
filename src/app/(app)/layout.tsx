@@ -19,10 +19,10 @@ import { useUser } from "@clerk/nextjs"; // Import Clerk's useUser hook
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" },
-  { name: "Purchase", icon: ShoppingCart, link: "/dashboard/purchase" },
-  { name: "Sales", icon: TrendingUp, link: "/dashboard/sales" },
-  { name: "Inventory", icon: Package, link: "/dashboard/inventory" },
-  { name: "Reports", icon: BarChart2, link: "/dashboard/reports" },
+  { name: "Purchase", icon: ShoppingCart, link: "/purchase" },
+  { name: "Sales", icon: TrendingUp, link: "/sales" },
+  { name: "Inventory", icon: Package, link: "/inventory" },
+  { name: "Reports", icon: BarChart2, link: "/reports" },
 ];
 
 export default function DashboardLayout({
