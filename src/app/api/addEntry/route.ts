@@ -17,55 +17,15 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-    const {
-      buyerName,
-      mobileNumber,
-      placeOfSupply,
-      buyerGST,
-      state,
-      district,
-      invoiceNo,
-      invoiceDate,
-      transport,
-      type,
-      products,
-      value,
-    } = body;
+    console.log(body, "idhhar hu 1");
 
-    // Validate required fields
-    if (
-      !buyerName ||
-      !mobileNumber ||
-      !placeOfSupply ||
-      !buyerGST ||
-      !state ||
-      !district ||
-      !invoiceNo ||
-      !invoiceDate ||
-      !transport ||
-      !type ||
-      !products ||
-      !value
-    ) {
-      return NextResponse.json({ message: "All fields are required." }, { status: 400 });
-    }
-
-    const newEntry = new Entries({
-        buyerName,
-        mobileNumber,
-        placeOfSupply,
-        buyerGST,
-        state,
-        district,
-        invoiceNo,
-        invoiceDate,
-        transport,
-        type,
-        products,
-        value,
-        }
-    );
+    console.log(body, "idhhar hu 1.5");
+    
+    console.log(body, "idhhar hu 2");
+    const newEntry = new Entries(body);
+    console.log(body, "idhhar hu 3");
     const savedEntry = await newEntry.save();
+    console.log(body, "idhhar hu 4");
     return NextResponse.json(savedEntry, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Error creating entry", error }, { status: 500 });

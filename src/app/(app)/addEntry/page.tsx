@@ -84,7 +84,7 @@ const salesForm: React.FC = () => {
 
     try {
       const response = await axios.post("/api/addEntry", payload);
-      if (response.status === 200) {
+      if (response.status == 201) {
         alert("Submitted successfully!");
         // Optionally reset the form
         setData({
