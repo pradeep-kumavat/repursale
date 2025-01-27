@@ -83,7 +83,9 @@ const salesForm: React.FC = () => {
     console.log("Submitting form:", payload);
 
     try {
-      const response = await axios.post("/api/addEntry", payload);
+      const response = await axios.post("/api/addEntry", payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
       if (response.status == 201) {
         alert("Submitted successfully!");
         // Optionally reset the form
@@ -156,6 +158,10 @@ const salesForm: React.FC = () => {
         type="text"
         className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         placeholder="Enter buyer name"
+        value={data.buyerName}
+        onChange={(e) =>
+          handleFormChange("buyerName", e.target.value)
+        }
       />
     </div>
     <div className="flex-1">

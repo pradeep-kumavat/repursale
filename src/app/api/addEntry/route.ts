@@ -17,15 +17,11 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-    console.log(body, "idhhar hu 1");
 
-    console.log(body, "idhhar hu 1.5");
-    
-    console.log(body, "idhhar hu 2");
     const newEntry = new Entries(body);
-    console.log(body, "idhhar hu 3");
+
     const savedEntry = await newEntry.save();
-    console.log(body, "idhhar hu 4");
+    
     return NextResponse.json(savedEntry, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Error creating entry", error }, { status: 500 });
