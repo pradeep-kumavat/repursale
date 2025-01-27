@@ -14,6 +14,7 @@ const salesForm: React.FC = () => {
     invoiceNo: "",
     invoiceDate: "",
     transport: "",
+    type: "",
   });
 
   const [products, setProducts] = useState([
@@ -82,7 +83,7 @@ const salesForm: React.FC = () => {
     console.log("Submitting form:", payload);
 
     try {
-      const response = await axios.post("", payload);
+      const response = await axios.post("/api/addEntry", payload);
       if (response.status === 200) {
         alert("Submitted successfully!");
         // Optionally reset the form
@@ -96,6 +97,7 @@ const salesForm: React.FC = () => {
           invoiceNo: "",
           invoiceDate: "",
           transport: "",
+          type: "",
         });
         setProducts([
           {
@@ -122,7 +124,25 @@ const salesForm: React.FC = () => {
 
   return (
   <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4 overflow-y-auto">
-  <h1 className="text-3xl font-bold mb-5 w-full p-4">Sales Invoice</h1>
+  <h1 className="text-3xl font-bold mb-5 w-full p-4">Add Invoice Entry</h1>
+  {/* add a select button to type purchase or sale invoide and then show the form accordingly */}
+  <div className="flex flex-wrap gap-6 ml-5 mb-5">
+    <div className="w-1/4">
+      <label className="block text-sm font-medium text-gray-300 mb-2">
+        Type
+      </label>
+      <select
+        className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        value={data.type}
+        onChange={(e) => handleFormChange("type", e.target.value)}
+      >
+        <option value="">Select a type</option>
+        <option value="purchase">Purchase</option>
+        <option value="sale">Sale</option>
+      </select>
+    </div>
+  </div>
+
   <div className="w-full max-w-6xl space-y-6 px-6">
     {/* Buyer Details */}
 <div className="space-y-4">
@@ -193,7 +213,7 @@ const salesForm: React.FC = () => {
     value={data.state}
     onChange={(e) => handleFormChange("state", e.target.value)}
   >
-    <option value="" disabled>Select a state</option>
+    <option value="">Select a state</option>
     <option value="Andhra Pradesh">Andhra Pradesh</option>
     <option value="Arunachal Pradesh">Arunachal Pradesh</option>
     <option value="Assam">Assam</option>

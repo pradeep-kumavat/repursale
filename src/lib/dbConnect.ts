@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-export async function connect() {
+export default async function dbConnect() {
     try {
         mongoose.connect(process.env.MONGODB_URI!)
         const connection = mongoose.connection

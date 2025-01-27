@@ -8,7 +8,7 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  ShoppingCart,
+  BadgePlus,
   TrendingUp,
   Package,
   BarChart2,
@@ -19,8 +19,7 @@ import { useUser } from "@clerk/nextjs"; // Import Clerk's useUser hook
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" },
-  { name: "Purchase", icon: ShoppingCart, link: "/purchase" },
-  { name: "Sales", icon: TrendingUp, link: "/sales" },
+  { name: "Add Entry", icon: BadgePlus , link: "/addEntry" },
   { name: "Inventory", icon: Package, link: "/inventory" },
   { name: "Reports", icon: BarChart2, link: "/reports" },
 ];
