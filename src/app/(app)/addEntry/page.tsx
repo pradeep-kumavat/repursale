@@ -89,7 +89,6 @@ const salesForm: React.FC = () => {
       );
       if (response.status == 201) {
         toast.success("Form submitted successfully.");
-        // Optionally reset the form
         setData({
           buyerName: "",
           mobileNumber: "",

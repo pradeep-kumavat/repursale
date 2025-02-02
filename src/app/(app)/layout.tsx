@@ -9,19 +9,18 @@ import {
   X,
   LayoutDashboard,
   BadgePlus,
-  TrendingUp,
   Package,
   BarChart2,
-  Settings,
+  ChevronDown,
+  ChevronUp,
   LogOut,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs"; // Import Clerk's useUser hook
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" },
-  { name: "Add Entry", icon: BadgePlus , link: "/addEntry" },
+  { name: "Add Entry", icon: BadgePlus, link: "/addEntry" },
   { name: "Inventory", icon: Package, link: "/inventory" },
-  { name: "Reports", icon: BarChart2, link: "/reports" },
 ];
 
 export default function DashboardLayout({
@@ -30,6 +29,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isReportsOpen, setIsReportsOpen] = useState(false); // State for toggling Reports dropdown
   const { user } = useUser();
   const pathname = usePathname(); // Get the current route
 
@@ -42,7 +42,10 @@ export default function DashboardLayout({
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => {
+              setIsMenuOpen(!isMenuOpen);
+              if (!isMenuOpen) setIsReportsOpen(false); // Close reports dropdown when menu closes
+            }}
             className="text-gray-300 hover:text-white"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -65,6 +68,48 @@ export default function DashboardLayout({
               {isMenuOpen && <span className="ml-2">{item.name}</span>}
             </Link>
           ))}
+
+          {/* Reports Section with Dropdown */}
+          <button
+            onClick={() => isMenuOpen && setIsReportsOpen(!isReportsOpen)}
+            className={`flex items-center w-full p-2 rounded-md ${
+              pathname.includes("/reports")
+                ? "bg-blue-800 text-white"
+                : "text-gray-300 hover:bg-gray-700 hover:text-white"
+            }`}
+          >
+            <div className="flex items-center flex-1">
+              <BarChart2 className="h-5 w-5" />
+              {isMenuOpen && <span className="ml-2">Reports</span>}
+            </div>
+            {isMenuOpen && (isReportsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />)}
+          </button>
+
+          {/* Dropdown Links for Purchase and Sales Records */}
+          {isReportsOpen && isMenuOpen && (
+            <div className="ml-6 mt-2 space-y-2">
+              <Link
+                href="/reports/purchase-reports"
+                className={`block p-2 rounded-md ${
+                  pathname === "/reports/purchase-reports"
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                Purchase Records
+              </Link>
+              <Link
+                href="/reports/sales-reports"
+                className={`block p-2 rounded-md ${
+                  pathname === "/reports/sales-reports"
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                Sales Records
+              </Link>
+            </div>
+          )}
         </nav>
       </div>
 

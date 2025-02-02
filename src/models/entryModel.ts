@@ -37,7 +37,6 @@ const productSchema = new Schema<Product>({
   taxableAmount: { type: String, required: [true, "Please provide the taxable amount"] },
 });
 
-
 const entrySchema = new Schema<Entry>({
   buyerName: { type: String, required: [true, "Please provide the name of the buyer"] },
   mobileNumber: { type: String, required: [true, "Please provide the mobile number of the buyer"] },
@@ -46,7 +45,20 @@ const entrySchema = new Schema<Entry>({
   state: { type: String, required: [true, "Please provide the state"] },
   district: { type: String, required: [true, "Please provide the district"] },
   invoiceNo: { type: String, required: [true, "Please provide the invoice number"] },
-  invoiceDate: { type: Date, required: [true, "Please provide the invoice date"] },
+  invoiceDate: { 
+    type: Date, 
+    required: [true, "Please provide the invoice date"],
+    get: function(date: Date) {
+      if (date) {
+        return new Date(date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).split('/').join('-'));
+      }
+      return date;
+    }
+  },
   transport: { type: String, required: [true, "Please provide the transport"] },
   type: { type: String, required: [true, "Please provide the type of entry"] },
   products: { type: [productSchema], required: true },
@@ -55,8 +67,10 @@ const entrySchema = new Schema<Entry>({
     sgst: { type: String, required: [true, "Please provide the SGST"] },
     totalAmount: { type: String, required: [true, "Please provide the total amount"] },
   },
+}, {
+  toJSON: { getters: true },
+  toObject: { getters: true }
 });
-
 
 const Entries: Model<Entry> = mongoose.models.Entries || mongoose.model<Entry>("Entries", entrySchema);
 
