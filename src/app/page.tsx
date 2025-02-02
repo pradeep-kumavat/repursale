@@ -217,7 +217,7 @@ export default function LandingPage() {
                 <BookOpen className="h-8 w-8 text-blue-400 mr-2" />
                 Repursale
               </span>
-              <p className="text-sm text-gray-400 mt-2">© 2023 Repursale. All rights reserved.</p>
+              <p className="text-sm text-gray-400 mt-2">© 2025 Repursale. All rights reserved.</p>
             </div>
             <div className="flex space-x-6">
               {["Terms", "Privacy", "Contact"].map((item) => (
