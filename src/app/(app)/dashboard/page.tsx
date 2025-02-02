@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       linkText: "Create Now",
     },
     {
-      title: "Manage Inventory",
+      title: "Manage Inventory & Stocks",
       description: "Track and manage your inventory efficiently.",
       icon: <Package className="w-8 h-8 text-purple-400" />,
       link: "/inventory",
@@ -51,16 +51,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {cards.map((card, index) => (
               <div
                 key={index}
-                className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-all duration-300 ease-in-out hover:scale-105"
+                className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col h-full transition-transform duration-300 ease-in-out hover:scale-105"
                 onMouseEnter={() => setHoveredCard(card.title)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
-                <div className="p-6 flex-1 flex flex-col">
+                <div className="p-6 flex-1 flex flex-col justify-between">
                   <div className="flex items-center justify-start mb-4 space-x-4">
                     {card.icon}
                     <h3 className="text-xl font-semibold">{card.title}</h3>
                   </div>
-                  <p className="text-gray-400 mb-4">{card.description}</p>
+                  <p className="text-gray-400 mb-4 flex-grow">{card.description}</p>
                   {card.link ? (
                     <Link
                       href={card.link}
