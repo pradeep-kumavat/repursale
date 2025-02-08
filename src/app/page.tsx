@@ -18,7 +18,7 @@ export default function LandingPage() {
   }, [isSignedIn, router])
 
   return (
-    <div className={`min-h-screen bg-gray-900 text-gray-100 ${isVisible ? "fade-in" : ""}`}>
+    <div className={`min-h-screen bg-gray-900 text-gray-100`}>
       <header className="bg-gray-800 bg-opacity-50 backdrop-blur-md fixed w-full z-10">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center">
@@ -115,7 +115,7 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-20 bg-gray-800">
+        <section id="How&#160;It&#160;Works" className="py-20 bg-gray-800">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl font-bold text-center mb-12 text-white">How Repursale Works</h2>
             <div className="flex flex-col md:flex-row justify-center items-center space-y-12 md:space-y-0 md:space-x-12">

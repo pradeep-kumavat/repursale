@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { X, ChevronUp, ChevronDown } from "lucide-react";
+import { X, ChevronUp, ChevronDown, Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 
 interface Product {
   description: string;
@@ -46,6 +47,8 @@ const SalesTable: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
+  const [entriesPerPage, setEntriesPerPage] = useState<string>("10");
 
   useEffect(() => {
     const fetchBuyers = async () => {
@@ -89,6 +92,24 @@ const SalesTable: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
+  const handleSelectEntry = (buyerId: string) => {
+    const newSelected = new Set(selectedEntries);
+    if (newSelected.has(buyerId)) {
+      newSelected.delete(buyerId);
+    } else {
+      newSelected.add(buyerId);
+    }
+    setSelectedEntries(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedEntries.size === sortedAndFilteredBuyers.length) {
+      setSelectedEntries(new Set());
+    } else {
+      setSelectedEntries(new Set(sortedAndFilteredBuyers.map(buyer => buyer._id)));
+    }
+  };
+
   const getSortedBuyers = (buyers: Buyer[]) => {
     if (!sortConfig) return buyers;
 
@@ -117,6 +138,53 @@ const SalesTable: React.FC = () => {
       }
       return bValue.localeCompare(aValue);
     });
+  };
+
+  const exportToExcel = () => {
+    // Filter only selected entries
+    const selectedBuyers = sortedAndFilteredBuyers.filter(buyer => 
+      selectedEntries.has(buyer._id)
+    );
+
+    if (selectedBuyers.length === 0) {
+      alert("Please select entries to export");
+      return;
+    }
+
+    // Prepare data for export
+    const exportData = selectedBuyers.map(buyer => {
+    
+      return {
+        'Buyer Name': buyer.buyerName,
+        'GST Number': buyer.buyerGST,
+        'Mobile Number': buyer.mobileNumber,
+        'Place of Supply': buyer.placeOfSupply,
+        'State': buyer.state,
+        'District': buyer.district,
+        'Invoice Number': buyer.invoiceNo,
+        'Invoice Date': new Date(buyer.invoiceDate).toLocaleDateString(),
+        'Transport': buyer.transport,
+        'CGST Rate': buyer.value.cgst + '%',
+        'SGST Rate': buyer.value.sgst + '%',
+        'CGST Amount': Number(buyer.value.cgst).toFixed(2),
+        'SGST Amount': Number(buyer.value.sgst).toFixed(2),
+        'Total Amount': Number(buyer.value.totalAmount).toFixed(2)
+      };
+    });
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
+
+    // Auto-size columns
+    const colWidths = Object.keys(exportData[0]).map(key => ({
+      wch: Math.max(key.length, 15)
+    }));
+    ws['!cols'] = colWidths;
+
+    // Generate & download file
+    XLSX.writeFile(wb, `sales_data_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const filteredBuyers = buyers.filter((buyer) => {
@@ -157,6 +225,7 @@ const SalesTable: React.FC = () => {
             className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 placeholder-gray-400 transition-all duration-300"
           />
         </div>
+
         <div className="md:w-48">
           <select
             value={selectedMonth}
@@ -178,6 +247,29 @@ const SalesTable: React.FC = () => {
             <option value="12">December</option>
           </select>
         </div>
+        
+        <div className="md:w-48">
+          <select
+            value={entriesPerPage}
+            onChange={(e) => setEntriesPerPage(e.target.value)}
+            className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
+          >
+            <option value="10">10 entries</option>
+            <option value="25">25 entries</option>
+            <option value="50">50 entries</option>
+            <option value="100">100 entries</option>
+          </select>
+        </div>
+
+        <button
+          onClick={exportToExcel}
+          className="md:w-48 p-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2"
+          disabled={selectedEntries.size === 0}
+        >
+          <Download size={20} />
+          Export Selected ({selectedEntries.size})
+        </button>
+
       </div>
 
       {loading && (
@@ -198,6 +290,14 @@ const SalesTable: React.FC = () => {
             <table className="min-w-full divide-y divide-blue-800">
               <thead>
                 <tr className="bg-blue-800 text-white">
+                  <th className="px-6 py-4 text-sm font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={selectedEntries.size === sortedAndFilteredBuyers.length && sortedAndFilteredBuyers.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    />
+                  </th>
                   {[
                     { key: 'buyerName', label: 'Buyer Name' },
                     { key: 'buyerGST', label: 'GST Number' },
@@ -224,12 +324,24 @@ const SalesTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-blue-900 divide-y divide-blue-800">
-                {sortedAndFilteredBuyers.map((buyer) => (
+                {sortedAndFilteredBuyers
+                  .slice(0, parseInt(entriesPerPage))
+                  .map((buyer) => (
                   <tr
                     key={buyer._id}
                     onClick={() => handleRowClick(buyer)}
                     className="hover:bg-blue-800 transition-colors duration-150 cursor-pointer"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedEntries.has(buyer._id)}
+                        onChange={() => handleSelectEntry(buyer._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                    </td>
+                    {/* The rest of your existing table cell code */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
                       {buyer.buyerName}
                     </td>
@@ -253,7 +365,7 @@ const SalesTable: React.FC = () => {
                 {sortedAndFilteredBuyers.length === 0 && (
                   <tr>
                     <td 
-                      colSpan={6} 
+                      colSpan={7} 
                       className="px-6 py-8 text-center text-gray-400 bg-blue-900"
                     >
                       No matching records found.
