@@ -170,7 +170,7 @@ const salesForm: React.FC = () => {
         Mobile Number
       </label>
       <input
-        type="text"
+        type="number"
         className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         placeholder="Enter mobile number"
         value={data.mobileNumber}
@@ -353,7 +353,7 @@ const salesForm: React.FC = () => {
             HSN Code
           </label>
           <input
-            type="text"
+            type="number"
             className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="Enter HSN code"
             value={product.hsnCode}
@@ -385,7 +385,7 @@ const salesForm: React.FC = () => {
             Rate
           </label>
           <input
-            type="text"
+            type="number"
             className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="Enter rate"
             value={product.rate}
@@ -401,7 +401,7 @@ const salesForm: React.FC = () => {
             Taxable Amount
           </label>
           <input
-            type="text"
+            type="number"
             className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="Enter taxable amount"
             value={product.taxableAmount}
@@ -471,7 +471,7 @@ const salesForm: React.FC = () => {
         Total Amount
       </label>
       <input
-        type="text"
+        type="number"
         className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
         placeholder="Enter total amount"
         value={value.totalAmount}

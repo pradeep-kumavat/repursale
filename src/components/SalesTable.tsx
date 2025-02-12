@@ -140,8 +140,28 @@ const SalesTable: React.FC = () => {
     });
   };
 
+  const calculateTotals = (entries: Buyer[]) => {
+    return entries.reduce((acc, entry) => {
+      const taxableValue = entry.products.reduce((sum, product) => 
+        sum + parseFloat(product.taxableAmount), 0);
+      const cgstAmount = (parseFloat(entry.value.cgst) / 100) * taxableValue;
+      const sgstAmount = (parseFloat(entry.value.sgst) / 100) * taxableValue;
+      
+      return {
+        totalTaxableValue: acc.totalTaxableValue + taxableValue,
+        totalCGST: acc.totalCGST + cgstAmount,
+        totalSGST: acc.totalSGST + sgstAmount,
+        totalInvoiceValue: acc.totalInvoiceValue + parseFloat(entry.value.totalAmount)
+      };
+    }, {
+      totalTaxableValue: 0,
+      totalCGST: 0,
+      totalSGST: 0,
+      totalInvoiceValue: 0
+    });
+  };
+
   const exportToExcel = () => {
-    // Filter only selected entries
     const selectedBuyers = sortedAndFilteredBuyers.filter(buyer => 
       selectedEntries.has(buyer._id)
     );
@@ -151,41 +171,116 @@ const SalesTable: React.FC = () => {
       return;
     }
 
-    // Prepare data for export
-    const exportData = selectedBuyers.map(buyer => {
+    const wb = XLSX.utils.book_new();
     
-      return {
-        'Buyer Name': buyer.buyerName,
-        'GST Number': buyer.buyerGST,
-        'Mobile Number': buyer.mobileNumber,
-        'Place of Supply': buyer.placeOfSupply,
-        'State': buyer.state,
-        'District': buyer.district,
-        'Invoice Number': buyer.invoiceNo,
-        'Invoice Date': new Date(buyer.invoiceDate).toLocaleDateString(),
-        'Transport': buyer.transport,
-        'CGST Rate': buyer.value.cgst + '%',
-        'SGST Rate': buyer.value.sgst + '%',
-        'CGST Amount': Number(buyer.value.cgst).toFixed(2),
-        'SGST Amount': Number(buyer.value.sgst).toFixed(2),
-        'Total Amount': Number(buyer.value.totalAmount).toFixed(2)
-      };
+    // Create Sales Register worksheet
+    const salesWS = XLSX.utils.aoa_to_sheet([
+      ['S. no.', 'Receiver Name', 'GSTIN/UIN of Recipient', 'Invoice Number', 'Invoice date', 'Taxable Value', 'Rate', 'CGST', 'SGST', 'Invoice Value'],
+    ]);
+
+    // Add sales entries
+    const salesData = selectedBuyers.map((buyer, index) => {
+      const taxableValue = buyer.products.reduce((sum, product) => 
+        sum + parseFloat(product.taxableAmount), 0);
+      const cgstAmount = (parseFloat(buyer.value.cgst) / 100) * taxableValue;
+      const sgstAmount = (parseFloat(buyer.value.sgst) / 100) * taxableValue;
+
+      return [
+        index + 1,
+        buyer.buyerName,
+        buyer.buyerGST,
+        buyer.invoiceNo,
+        new Date(buyer.invoiceDate).toLocaleDateString('en-IN'),
+        taxableValue.toFixed(2),
+        buyer.value.cgst,
+        cgstAmount.toFixed(2),
+        sgstAmount.toFixed(2),
+        parseFloat(buyer.value.totalAmount).toFixed(2)
+      ];
     });
 
-    // Create worksheet
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
+    // Add sales data and totals
+    const salesTotals = calculateTotals(selectedBuyers);
+    const salesWithTotals = [
+      ...salesData,
+      ['TOTAL', '', '', '', '', 
+        salesTotals.totalTaxableValue.toFixed(2), '',
+        salesTotals.totalCGST.toFixed(2),
+        salesTotals.totalSGST.toFixed(2),
+        salesTotals.totalInvoiceValue.toFixed(2)
+      ]
+    ];
 
-    // Auto-size columns
-    const colWidths = Object.keys(exportData[0]).map(key => ({
-      wch: Math.max(key.length, 15)
-    }));
-    ws['!cols'] = colWidths;
+    XLSX.utils.sheet_add_aoa(salesWS, salesWithTotals, { origin: 'A2' });
 
-    // Generate & download file
-    XLSX.writeFile(wb, `sales_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+    // Add summary section
+    const summaryData = [
+      [''],
+      ['Total Purchases During the Month', salesTotals.totalInvoiceValue.toFixed(2)],
+      ['Total Sale During The Month', salesTotals.totalInvoiceValue.toFixed(2)],
+      ['Total sales CGST During the month', salesTotals.totalCGST.toFixed(2)],
+      ['Total Sales SGST During The Month', salesTotals.totalSGST.toFixed(2)],
+      [''],
+      ['Total Sales CGST', salesTotals.totalCGST.toFixed(2)],
+      ['- Total Purchase CGST', '0.00'],
+      ['Total Payable CGST', salesTotals.totalCGST.toFixed(2)],
+      [''],
+      ['Total Sales SGST', salesTotals.totalSGST.toFixed(2)],
+      ['- Total Purchases SGST', '0.00'],
+      ['Total Payable SGST', salesTotals.totalSGST.toFixed(2)],
+      [''],
+      ['Firm Name & GST No.', 'AC ZONE 23DMCPK0689C1ZC'],
+      ['Return Period', selectedMonth ? 
+        `01.${selectedMonth}.${new Date().getFullYear()} TO ${new Date(new Date().getFullYear(), parseInt(selectedMonth), 0).getDate()}.${selectedMonth}.${new Date().getFullYear()}` :
+        `01.01.${new Date().getFullYear()} TO 31.12.${new Date().getFullYear()}`
+      ]
+    ];
+
+    XLSX.utils.sheet_add_aoa(salesWS, summaryData, { origin: `A${salesWithTotals.length + 3}` });
+
+    // Set column widths
+    salesWS['!cols'] = [
+      { wch: 6 },   // S.no.
+      { wch: 30 },  // Receiver Name
+      { wch: 25 },  // GSTIN/UIN
+      { wch: 15 },  // Invoice Number
+      { wch: 12 },  // Invoice Date
+      { wch: 15 },  // Taxable Value
+      { wch: 8 },   // Rate
+      { wch: 12 },  // CGST
+      { wch: 12 },  // SGST
+      { wch: 15 }   // Invoice Value
+    ];
+
+    // Apply styles
+    const range = XLSX.utils.decode_range(salesWS['!ref'] || 'A1:J1');
+    for (let R = range.s.r; R <= range.e.r; R++) {
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!salesWS[addr]) continue;
+        
+        salesWS[addr].s = {
+          font: { bold: R === 0 || R === salesData.length + 1 },
+          alignment: { 
+            horizontal: C >= 5 ? 'right' : 'left',
+            vertical: 'center'
+          },
+          numFmt: C >= 5 ? '#,##0.00' : '@'
+        };
+      }
+    }
+
+    XLSX.utils.book_append_sheet(wb, salesWS, "Sales Register");
+
+    // Generate filename
+    const month = selectedMonth 
+      ? new Date(2024, parseInt(selectedMonth) - 1).toLocaleDateString('en-US', { month: 'long' })
+      : 'All_Months';
+    const fileName = `AC_ZONE_Sales_Register_${month}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
   };
+
 
   const filteredBuyers = buyers.filter((buyer) => {
     const invoiceMonth = new Date(buyer.invoiceDate).getMonth() + 1;
