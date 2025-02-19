@@ -11,6 +11,7 @@ interface Product {
 
 // Interface for Entry
 interface Entry extends Document {
+  userId: string;
   buyerName: string;
   mobileNumber: string;
   placeOfSupply: string;
@@ -38,6 +39,10 @@ const productSchema = new Schema<Product>({
 });
 
 const entrySchema = new Schema<Entry>({
+  userId: {  // Add userId field
+    type: String,
+    required: true,
+  },
   buyerName: { type: String, required: [true, "Please provide the name of the buyer"] },
   mobileNumber: { type: String, required: [true, "Please provide the mobile number of the buyer"] },
   placeOfSupply: { type: String, required: [true, "Please provide the place of supply"] },
@@ -48,16 +53,6 @@ const entrySchema = new Schema<Entry>({
   invoiceDate: { 
     type: Date, 
     required: [true, "Please provide the invoice date"],
-    get: function(date: Date) {
-      if (date) {
-        return new Date(date.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }).split('/').join('-'));
-      }
-      return date;
-    }
   },
   transport: { type: String, required: [true, "Please provide the transport"] },
   type: { type: String, required: [true, "Please provide the type of entry"] },

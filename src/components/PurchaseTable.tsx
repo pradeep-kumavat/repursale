@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { X, ChevronUp, ChevronDown } from "lucide-react";
+import { X, ChevronUp, ChevronDown, Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 
 interface Product {
   description: string;
@@ -42,17 +43,22 @@ const PurchaseTable: React.FC = () => {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [filter, setFilter] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [selectedEntries, setSelectedEntries] = useState<Set<string>>(new Set());
+  const [entriesPerPage, setEntriesPerPage] = useState<string>("10");
 
   useEffect(() => {
     const fetchBuyers = async () => {
       setLoading(true);
       try {
         const response = await axios.get("/api/addEntry");
-        setBuyers(response.data);
+        
+        const saleBuyers = response.data.filter((buyer: Buyer) => buyer.type.toLowerCase() === "purchase");
+        setBuyers(saleBuyers);
       } catch (err: unknown) {
         setError((err as Error).message || "Failed to fetch buyers.");
       } finally {
@@ -89,6 +95,24 @@ const PurchaseTable: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
+  const handleSelectEntry = (buyerId: string) => {
+    const newSelected = new Set(selectedEntries);
+    if (newSelected.has(buyerId)) {
+      newSelected.delete(buyerId);
+    } else {
+      newSelected.add(buyerId);
+    }
+    setSelectedEntries(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedEntries.size === sortedAndFilteredBuyers.length) {
+      setSelectedEntries(new Set());
+    } else {
+      setSelectedEntries(new Set(sortedAndFilteredBuyers.map(buyer => buyer._id)));
+    }
+  };
+
   const getSortedBuyers = (buyers: Buyer[]) => {
     if (!sortConfig) return buyers;
 
@@ -119,8 +143,141 @@ const PurchaseTable: React.FC = () => {
     });
   };
 
+  const calculateTotals = (entries: Buyer[]) => {
+    return entries.reduce((acc, entry) => {
+      const taxableValue = entry.products.reduce((sum, product) => 
+        sum + parseFloat(product.taxableAmount), 0);
+      const cgstAmount = (parseFloat(entry.value.cgst) / 100) * taxableValue;
+      const sgstAmount = (parseFloat(entry.value.sgst) / 100) * taxableValue;
+      
+      return {
+        totalTaxableValue: acc.totalTaxableValue + taxableValue,
+        totalCGST: acc.totalCGST + cgstAmount,
+        totalSGST: acc.totalSGST + sgstAmount,
+        totalInvoiceValue: acc.totalInvoiceValue + parseFloat(entry.value.totalAmount)
+      };
+    }, {
+      totalTaxableValue: 0,
+      totalCGST: 0,
+      totalSGST: 0,
+      totalInvoiceValue: 0
+    });
+  };
+
+  const exportToExcel = () => {
+    const selectedBuyers = sortedAndFilteredBuyers.filter(buyer => 
+      selectedEntries.has(buyer._id)
+    );
+
+    if (selectedBuyers.length === 0) {
+      alert("Please select entries to export");
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    
+    // Create Sales Register worksheet
+    const purchaseWS = XLSX.utils.aoa_to_sheet([
+      ['S. no.', 'Receiver Name', 'GSTIN/UIN of Recipient', 'Invoice Number', 'Invoice date', 'Taxable Value', 'Rate', 'CGST', 'SGST', 'Invoice Value'],
+    ]);
+
+    // Add sales entries
+    const purchaseData = selectedBuyers.map((buyer, index) => {
+      const taxableValue = buyer.products.reduce((sum, product) => 
+        sum + parseFloat(product.taxableAmount), 0);
+      const cgstAmount = (parseFloat(buyer.value.cgst) / 100) * taxableValue;
+      const sgstAmount = (parseFloat(buyer.value.sgst) / 100) * taxableValue;
+
+      return [
+        index + 1,
+        buyer.buyerName,
+        buyer.buyerGST,
+        buyer.invoiceNo,
+        new Date(buyer.invoiceDate).toLocaleDateString('en-IN'),
+        taxableValue.toFixed(2),
+        buyer.value.cgst,
+        cgstAmount.toFixed(2),
+        sgstAmount.toFixed(2),
+        parseFloat(buyer.value.totalAmount).toFixed(2)
+      ];
+    });
+
+    // Add sales data and totals
+    const purchaseTotals = calculateTotals(selectedBuyers);
+    const purchaseWithTotals = [
+      ...purchaseData,
+      ['TOTAL', '', '', '', '', 
+        purchaseTotals.totalTaxableValue.toFixed(2), '',
+        purchaseTotals.totalCGST.toFixed(2),
+        purchaseTotals.totalSGST.toFixed(2),
+        purchaseTotals.totalInvoiceValue.toFixed(2)
+      ]
+    ];
+
+    XLSX.utils.sheet_add_aoa(purchaseWS, purchaseWithTotals, { origin: 'A2' });
+
+    // Add summary section
+
+    XLSX.utils.sheet_add_aoa(purchaseWS, [], { origin: `A${purchaseWithTotals.length + 3}` });
+
+    // Set column widths
+    purchaseWS['!cols'] = [
+      { wch: 6 },   // S.no.
+      { wch: 30 },  // Receiver Name
+      { wch: 25 },  // GSTIN/UIN
+      { wch: 15 },  // Invoice Number
+      { wch: 12 },  // Invoice Date
+      { wch: 15 },  // Taxable Value
+      { wch: 8 },   // Rate
+      { wch: 12 },  // CGST
+      { wch: 12 },  // SGST
+      { wch: 15 }   // Invoice Value
+    ];
+
+    // Apply styles
+    const range = XLSX.utils.decode_range(purchaseWS['!ref'] || 'A1:J1');
+    for (let R = range.s.r; R <= range.e.r; R++) {
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!purchaseWS[addr]) continue;
+        
+        purchaseWS[addr].s = {
+          font: { bold: R === 0 || R === purchaseData.length + 1 },
+          alignment: { 
+            horizontal: C >= 5 ? 'right' : 'left',
+            vertical: 'center'
+          },
+          numFmt: C >= 5 ? '#,##0.00' : '@'
+        };
+      }
+    }
+
+    XLSX.utils.book_append_sheet(wb, purchaseWS, "Purchase Register");
+
+    // Generate filename
+    const month = selectedMonth 
+      ? new Date(2024, parseInt(selectedMonth) - 1).toLocaleDateString('en-US', { month: 'long' })
+      : 'All_Months';
+    const fileName = `AC_ZONE_Purchase_Register_${month}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(e.target.value);
+  };
+
+  // Generate array of years from 2020 to current year
+  const years = Array.from(
+    { length: new Date().getFullYear() - 2020 + 1 },
+    (_, i) => (2020 + i).toString()
+  ).reverse();
+
+
   const filteredBuyers = buyers.filter((buyer) => {
-    const invoiceMonth = new Date(buyer.invoiceDate).getMonth() + 1;
+    const invoiceDate = new Date(buyer.invoiceDate);
+    const invoiceMonth = invoiceDate.getMonth() + 1;
+    const invoiceYear = invoiceDate.getFullYear().toString();
     const selectedMonthNum = selectedMonth ? parseInt(selectedMonth) : null;
 
     return (
@@ -130,7 +287,8 @@ const PurchaseTable: React.FC = () => {
         buyer.placeOfSupply.toLowerCase().includes(filter.toLowerCase()) ||
         buyer.invoiceNo.toLowerCase().includes(filter.toLowerCase()) ||
         buyer.value.totalAmount.includes(filter)) &&
-      (!selectedMonthNum || invoiceMonth === selectedMonthNum)
+      (!selectedMonthNum || invoiceMonth === selectedMonthNum) &&
+      invoiceYear === selectedYear
     );
   });
 
@@ -145,39 +303,79 @@ const PurchaseTable: React.FC = () => {
       : <ChevronDown className="inline-block ml-2" size={14} />;
   };
 
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={filter}
-            onChange={handleFilterChange}
-            placeholder="Search by name, GST, place, or invoice"
-            className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 placeholder-gray-400 transition-all duration-300"
-          />
-        </div>
-        <div className="md:w-48">
+    <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex-1">
+        <input
+          type="text"
+          value={filter}
+          onChange={handleFilterChange}
+          placeholder="Search by name, GST, place, or invoice"
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 placeholder-gray-400 transition-all duration-300"
+        />
+      </div>
+
+      {/* Add Year Filter Dropdown */}
+      <div className="md:w-25">
+        <select
+          value={selectedYear}
+          onChange={handleYearChange}
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
+        >
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="md:w-30">
+        <select
+          value={selectedMonth}
+          onChange={handleMonthChange}
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
+        >
+          <option value="">All Months</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+        
+        <div className="md:w-35">
           <select
-            value={selectedMonth}
-            onChange={handleMonthChange}
+            value={entriesPerPage}
+            onChange={(e) => setEntriesPerPage(e.target.value)}
             className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
           >
-            <option value="">All Months</option>
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
+            <option value="10">10 entries</option>
+            <option value="25">25 entries</option>
+            <option value="50">50 entries</option>
+            <option value="100">100 entries</option>
           </select>
         </div>
+
+        <button
+          onClick={exportToExcel}
+          className="md:w-48 p-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2"
+          disabled={selectedEntries.size === 0}
+        >
+          <Download size={20} />
+          Export Selected ({selectedEntries.size})
+        </button>
+
       </div>
 
       {loading && (
@@ -198,6 +396,14 @@ const PurchaseTable: React.FC = () => {
             <table className="min-w-full divide-y divide-blue-800">
               <thead>
                 <tr className="bg-blue-800 text-white">
+                  <th className="px-6 py-4 text-sm font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={selectedEntries.size === sortedAndFilteredBuyers.length && sortedAndFilteredBuyers.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    />
+                  </th>
                   {[
                     { key: 'buyerName', label: 'Buyer Name' },
                     { key: 'buyerGST', label: 'GST Number' },
@@ -224,12 +430,24 @@ const PurchaseTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-blue-900 divide-y divide-blue-800">
-                {sortedAndFilteredBuyers.map((buyer) => (
+                {sortedAndFilteredBuyers
+                  .slice(0, parseInt(entriesPerPage))
+                  .map((buyer) => (
                   <tr
                     key={buyer._id}
                     onClick={() => handleRowClick(buyer)}
                     className="hover:bg-blue-800 transition-colors duration-150 cursor-pointer"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedEntries.has(buyer._id)}
+                        onChange={() => handleSelectEntry(buyer._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                    </td>
+                    {/* The rest of your existing table cell code */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
                       {buyer.buyerName}
                     </td>
@@ -253,7 +471,7 @@ const PurchaseTable: React.FC = () => {
                 {sortedAndFilteredBuyers.length === 0 && (
                   <tr>
                     <td 
-                      colSpan={6} 
+                      colSpan={7} 
                       className="px-6 py-8 text-center text-gray-400 bg-blue-900"
                     >
                       No matching records found.

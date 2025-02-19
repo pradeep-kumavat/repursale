@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { X, ChevronUp, ChevronDown, Download } from "lucide-react";
@@ -40,9 +41,11 @@ type SortConfig = {
 } | null;
 
 const SalesTable: React.FC = () => {
+  const { user } = useUser();
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [filter, setFilter] = useState("");
   const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
@@ -52,10 +55,14 @@ const SalesTable: React.FC = () => {
 
   useEffect(() => {
     const fetchBuyers = async () => {
+      if (!user) return;
       setLoading(true);
       try {
         const response = await axios.get("/api/addEntry");
-        setBuyers(response.data);
+        // Filter buyers whose type is "sale"
+        const saleBuyers = response.data.filter((buyer: Buyer) => buyer.type.toLowerCase() === "sale");
+        setBuyers(saleBuyers);
+
       } catch (err: unknown) {
         setError((err as Error).message || "Failed to fetch buyers.");
       } finally {
@@ -64,7 +71,7 @@ const SalesTable: React.FC = () => {
     };
 
     fetchBuyers();
-  }, []);
+  },[]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
@@ -214,29 +221,8 @@ const SalesTable: React.FC = () => {
     XLSX.utils.sheet_add_aoa(salesWS, salesWithTotals, { origin: 'A2' });
 
     // Add summary section
-    const summaryData = [
-      [''],
-      ['Total Purchases During the Month', salesTotals.totalInvoiceValue.toFixed(2)],
-      ['Total Sale During The Month', salesTotals.totalInvoiceValue.toFixed(2)],
-      ['Total sales CGST During the month', salesTotals.totalCGST.toFixed(2)],
-      ['Total Sales SGST During The Month', salesTotals.totalSGST.toFixed(2)],
-      [''],
-      ['Total Sales CGST', salesTotals.totalCGST.toFixed(2)],
-      ['- Total Purchase CGST', '0.00'],
-      ['Total Payable CGST', salesTotals.totalCGST.toFixed(2)],
-      [''],
-      ['Total Sales SGST', salesTotals.totalSGST.toFixed(2)],
-      ['- Total Purchases SGST', '0.00'],
-      ['Total Payable SGST', salesTotals.totalSGST.toFixed(2)],
-      [''],
-      ['Firm Name & GST No.', 'AC ZONE 23DMCPK0689C1ZC'],
-      ['Return Period', selectedMonth ? 
-        `01.${selectedMonth}.${new Date().getFullYear()} TO ${new Date(new Date().getFullYear(), parseInt(selectedMonth), 0).getDate()}.${selectedMonth}.${new Date().getFullYear()}` :
-        `01.01.${new Date().getFullYear()} TO 31.12.${new Date().getFullYear()}`
-      ]
-    ];
 
-    XLSX.utils.sheet_add_aoa(salesWS, summaryData, { origin: `A${salesWithTotals.length + 3}` });
+    XLSX.utils.sheet_add_aoa(salesWS, [], { origin: `A${salesWithTotals.length + 3}` });
 
     // Set column widths
     salesWS['!cols'] = [
@@ -281,9 +267,21 @@ const SalesTable: React.FC = () => {
     XLSX.writeFile(wb, fileName);
   };
 
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedYear(e.target.value);
+  };
+
+  // Generate array of years from 2020 to current year
+  const years = Array.from(
+    { length: new Date().getFullYear() - 2020 + 1 },
+    (_, i) => (2020 + i).toString()
+  ).reverse();
+
 
   const filteredBuyers = buyers.filter((buyer) => {
-    const invoiceMonth = new Date(buyer.invoiceDate).getMonth() + 1;
+    const invoiceDate = new Date(buyer.invoiceDate);
+    const invoiceMonth = invoiceDate.getMonth() + 1;
+    const invoiceYear = invoiceDate.getFullYear().toString();
     const selectedMonthNum = selectedMonth ? parseInt(selectedMonth) : null;
 
     return (
@@ -293,7 +291,8 @@ const SalesTable: React.FC = () => {
         buyer.placeOfSupply.toLowerCase().includes(filter.toLowerCase()) ||
         buyer.invoiceNo.toLowerCase().includes(filter.toLowerCase()) ||
         buyer.value.totalAmount.includes(filter)) &&
-      (!selectedMonthNum || invoiceMonth === selectedMonthNum)
+      (!selectedMonthNum || invoiceMonth === selectedMonthNum) &&
+      invoiceYear === selectedYear
     );
   });
 
@@ -308,42 +307,69 @@ const SalesTable: React.FC = () => {
       : <ChevronDown className="inline-block ml-2" size={14} />;
   };
 
-  return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={filter}
-            onChange={handleFilterChange}
-            placeholder="Search by name, GST, place, or invoice"
-            className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 placeholder-gray-400 transition-all duration-300"
-          />
-        </div>
 
-        <div className="md:w-48">
-          <select
-            value={selectedMonth}
-            onChange={handleMonthChange}
-            className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
-          >
-            <option value="">All Months</option>
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
+  return (
+  <>
+      {!user ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Please sign in to view your sales data
+            </h2>
+            {/* Add your sign-in button or redirect logic here */}
+          </div>
         </div>
+      ) : (
+  <div className="container mx-auto px-4 py-6">
+    <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="flex-1">
+        <input
+          type="text"
+          value={filter}
+          onChange={handleFilterChange}
+          placeholder="Search by name, GST, place, or invoice"
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 placeholder-gray-400 transition-all duration-300"
+        />
+      </div>
+
+      {/* Add Year Filter Dropdown */}
+      <div className="md:w-25">
+        <select
+          value={selectedYear}
+          onChange={handleYearChange}
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
+        >
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="md:w-30">
+        <select
+          value={selectedMonth}
+          onChange={handleMonthChange}
+          className="w-full p-3 border-2 border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900 transition-all duration-300"
+        >
+          <option value="">All Months</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
         
-        <div className="md:w-48">
+        <div className="md:w-35">
           <select
             value={entriesPerPage}
             onChange={(e) => setEntriesPerPage(e.target.value)}
@@ -594,6 +620,8 @@ const SalesTable: React.FC = () => {
   </div>
 )}
 </div>
+)}
+</>
 );
 };
 
