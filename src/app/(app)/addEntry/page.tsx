@@ -4,7 +4,7 @@ import { Trash2, PlusCircle } from 'lucide-react';
 import axios from "axios";
 import toast, { Toaster } from 'react-hot-toast';
 
-const salesForm: React.FC = () => {
+const addInvoiceForm: React.FC = () => {
   const [data, setData] = useState({
     buyerName: "",
     mobileNumber: "",
@@ -494,4 +494,4 @@ const salesForm: React.FC = () => {
   );
 };
 
-export default salesForm;
+export default addInvoiceForm;
