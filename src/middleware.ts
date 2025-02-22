@@ -2,11 +2,14 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
-    "/", // Add more public routes if needed
+    "/",
+    "/privacy",
+    "/terms",
+    "/contact",
 ]);
 
 const isPublicApiRoute = createRouteMatcher([
-    "/", // Specify actual public API endpoints
+    "/api/send-msg", 
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -18,7 +21,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     // If user is logged in and trying to access a public route, redirect to dashboard
     if (userId && isPublicRoute(req) && isAccessingDashboard) {
-        return NextResponse.redirect(new URL("/dashboard", req.url)); // Fixed typo
+        return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     // If user is not logged in

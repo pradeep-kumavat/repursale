@@ -84,9 +84,11 @@ const addInvoiceForm: React.FC = () => {
     console.log("Submitting form:", payload);
 
     try {
+      const toastId = toast.loading("Submitting Invoice...");
       const response = await axios.post("/api/addEntry", payload,
         { headers: { "Content-Type": "application/json" } }
       );
+      toast.dismiss(toastId);
       if (response.status == 201) {
         toast.success("Form submitted successfully.");
         setData({
@@ -116,7 +118,7 @@ const addInvoiceForm: React.FC = () => {
           totalAmount: "",
         });
       } else {
-        toast.error("Failed to submit form.");
+        toast.error("Failed to submit Invoice.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
