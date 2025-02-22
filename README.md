@@ -1,4 +1,4 @@
-# Reapursale
+# Repursale
 
 ## Overview
 Reapursale is a web-based application designed to streamline the creation, storage, and export of purchase and sale invoices. The platform enables users to efficiently manage their transactions while maintaining a structured record of all financial dealings.
