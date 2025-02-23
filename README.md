@@ -1,7 +1,7 @@
-# Reapursale
+# Repursale
 
 ## Overview
-Reapursale is a web-based application designed to streamline the creation, storage, and export of purchase and sale invoices. The platform enables users to efficiently manage their transactions while maintaining a structured record of all financial dealings.
+Repursale is a web-based application designed to streamline the creation, storage, and export of purchase and sale invoices. The platform enables users to efficiently manage their transactions while maintaining a structured record of all financial dealings.
 
 ## Features
 - **Invoice Management**: Create, edit, and delete purchase and sale invoices.
@@ -12,8 +12,8 @@ Reapursale is a web-based application designed to streamline the creation, stora
 - **Search & Filter**: Quickly find invoices based on specific criteria.
 
 ## Tech Stack
-- **Frontend**: Next.js, React.js, Tailwind CSS
-- **Backend**: Node.js, Express.js
+- **Frontend**: Next.js, Tailwind CSS
+- **Backend**: Nextjs
 - **Database**: MongoDB
 - **Authentication**: Clerk/Auth.js
 - **Styling**: Tailwind CSS
