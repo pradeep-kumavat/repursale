@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { 
   ChevronRight, 
@@ -10,6 +10,7 @@ import {
   TrendingUp,
   DollarSign
 } from "lucide-react";
+import { CompanyDetailsPopup } from "@/components/CompanyDetailsPopup"; 
 
 interface DashboardProps {
   children: ReactNode;
@@ -17,6 +18,37 @@ interface DashboardProps {
 
 export default function DashboardLayout({ children }: DashboardProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  
+  useEffect(() => {
+    // Check if this is the first time after login/signup
+    const hasSeenPopup = localStorage.getItem('hasCompletedCompanyDetails');
+    
+    // Only show popup if the user hasn't completed it before
+    if (!hasSeenPopup) {
+      setShowPopup(true);
+    }
+  }, []);
+
+  const handlePopupSubmit = (data: any) => {
+    
+    // Set flag to indicate user has completed the form
+    localStorage.setItem('hasCompletedCompanyDetails', 'true');
+    
+    // Close the popup
+    setShowPopup(false);
+    
+    // Additional logic for form submission (e.g., API call to save data)
+    
+    console.log('Company details submitted:', data);
+  };
+
+  const handlePopupClose = () => {
+    // When the user explicitly closes the popup, also mark it as seen
+    // so it doesn't show again on page refresh
+    localStorage.setItem('hasCompletedCompanyDetails', 'true');
+    setShowPopup(false);
+  };
 
   const stats = [
     { label: "Total Sales", value: "₹45,231", trend: "+12.5%", color: "text-green-400" },
@@ -149,6 +181,14 @@ export default function DashboardLayout({ children }: DashboardProps) {
           )}
         </div>
       </main>
+
+      {/* Company Details Popup */}
+      {showPopup && (
+        <CompanyDetailsPopup 
+          onClose={handlePopupClose} 
+          onSubmit={handlePopupSubmit} 
+        />
+      )}
     </div>
   );
 }
