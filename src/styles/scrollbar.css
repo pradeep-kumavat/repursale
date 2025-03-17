@@ -1,0 +1,71 @@
+/* Custom Scrollbar Styles */
+
+/* For Webkit browsers (Chrome, Safari, newer versions of Opera) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5); /* slate-800 with transparency */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #3b82f6, #1d4ed8); /* blue-500 to blue-700 */
+  border-radius: 8px;
+  border: 2px solid rgba(30, 41, 59, 0.5); /* Creates padding effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6); /* blue-400 to blue-500 */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 rgba(30, 41, 59, 0.5); /* blue-500 and slate-800 */
+}
+
+/* For Edge and IE */
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* For dark scrollbars in modals and other elements with light backgrounds */
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.7); /* slate-900 with transparency */
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(15, 23, 42, 0.7);
+}
+
+/* For light scrollbars in elements with dark backgrounds */
+.light-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.1); /* slate-100 with transparency */
+}
+
+.light-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6); /* lighter blue gradient */
+  border: 2px solid rgba(241, 245, 249, 0.1);
+}
+
+/* Thin scrollbar variant */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+} 

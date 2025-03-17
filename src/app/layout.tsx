@@ -19,8 +19,8 @@ export default function RootLayout({
     appearance={{
       baseTheme: dark,
     }}>
-    <html lang="en">
-      <body>
+    <html lang="en" className="light-scrollbar">
+      <body className="light-scrollbar">
         {children}
       </body>
     </html>

@@ -56,7 +56,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
 
         {/* Sidebar Menu */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto thin-scrollbar">
           {menuItems.map((item, index) => (
             <Link
               key={index}
@@ -106,7 +106,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto bg-gray-950">
+        <main className="flex-1 overflow-auto bg-gray-950 light-scrollbar">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

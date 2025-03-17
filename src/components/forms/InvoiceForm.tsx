@@ -168,7 +168,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-950 text-white p-4 overflow-y-auto">
+    <div className="flex flex-col min-h-screen bg-gray-950 text-white p-4 overflow-y-auto light-scrollbar">
       <Toaster />
       <h1 className="text-3xl font-bold mb-5 w-full p-4">Add Invoice Entry</h1>
       
