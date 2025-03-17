@@ -169,7 +169,7 @@ export const exportToExcel = (
   const month = selectedMonth 
     ? new Date(2024, parseInt(selectedMonth) - 1).toLocaleDateString('en-US', { month: 'long' })
     : 'All_Months';
-  const fileName = `AC_ZONE_Purchase_Register_${month}_${new Date().toISOString().split('T')[0]}.xlsx`;
+  const fileName = `Purchase_Register_${month}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
   XLSX.writeFile(wb, fileName);
 }; 
