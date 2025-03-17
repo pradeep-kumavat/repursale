@@ -349,20 +349,38 @@ const addInvoiceForm: React.FC = () => {
           />
         </div>
 
-        {/* HSN Code */}
-        <div className="flex-1 min-w-[220px]">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            HSN Code
-          </label>
-          <input
-            type="number"
-            className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="Enter HSN code"
-            value={product.hsnCode}
-            onChange={(e) =>
-              handleInputChange(index, "hsnCode", e.target.value)
-            }
-          />
+        <div className="flex flex-col gap-4 flex-1 min-w-[220px]">
+          {/* HSN Code */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              HSN Code
+            </label>
+            <input
+              type="number"
+              className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Enter HSN code"
+              value={product.hsnCode}
+              onChange={(e) =>
+                handleInputChange(index, "hsnCode", e.target.value)
+              }
+            />
+          </div>
+          
+          {/* Taxable Amount */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Taxable Amount
+            </label>
+            <input
+              type="number"
+              className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Enter taxable amount"
+              value={product.taxableAmount}
+              onChange={(e) =>
+                handleInputChange(index, "taxableAmount", e.target.value)
+              }
+            />
+          </div>
         </div>
 
         {/* Quantity */}
@@ -396,44 +414,34 @@ const addInvoiceForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Taxable Amount */}
-      <div className="flex flex-1 gap-6">
-        <div className="flex-none w-[200px]">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Taxable Amount
-          </label>
-          <input
-            type="number"
-            className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="Enter taxable amount"
-            value={product.taxableAmount}
-            onChange={(e) =>
-              handleInputChange(index, "taxableAmount", e.target.value)
-            }
-          />
-        </div>
-      </div>
-
       {/* Remove Button */}
-      {products.length > 1 && (
-      <button
-        onClick={() => removeProduct(index)}
-        className="mt-2 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 flex items-center space-x-2"
-      >
-        <Trash2 className="w-5 h-5" />
-      </button>
-      )}
+      <div className="flex justify-end mt-2">
+        <button
+          onClick={() => removeProduct(index)}
+          className={`px-4 py-2 text-white rounded-lg flex items-center space-x-2 ${
+            products.length > 1 
+              ? "bg-red-700 hover:bg-red-800" 
+              : "bg-red-700/50 cursor-not-allowed"
+          }`}
+          disabled={products.length <= 1}
+        >
+          <Trash2 className="w-5 h-5" />
+          <span>Remove</span>
+        </button>
+      </div>
     </div>
   ))}
 
   {/* Add Product Button */}
-  <button
-    onClick={addProduct}
-    className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 flex items-center space-x-2"
-  >
-    <PlusCircle className="w-5 h-5" />
-    <span>Add Product</span>
-  </button>
+  <div className="flex justify-end mt-4">
+    <button
+      onClick={addProduct}
+      className="px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 flex items-center space-x-2"
+    >
+      <PlusCircle className="w-5 h-5" />
+      <span>Add Product</span>
+    </button>
+  </div>
 
   {/*  CGST, SGST, Total Amount Fields */}
   <div className="flex flex-wrap gap-6 mt-4">
