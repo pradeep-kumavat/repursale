@@ -10,11 +10,11 @@ import {
   BadgePlus,
   Package,
   BarChart2,
-  ChevronDown,
-  ChevronUp,
   LogOut,
   Settings,
   Bell,
+  ShoppingCart,
+  Receipt,
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -25,11 +25,12 @@ const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, link: "/dashboard" },
   { name: "Add Invoice", icon: BadgePlus, link: "/addEntry" },
   { name: "Inventory", icon: Package, link: "/inventory" },
+  { name: "Purchase Records", icon: ShoppingCart, link: "/reports/purchase-reports" },
+  { name: "Sales Records", icon: Receipt, link: "/reports/sales-reports" },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isReportsOpen, setIsReportsOpen] = useState(false);
   const { user } = useUser();
   const pathname = usePathname();
 
@@ -47,10 +48,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <h1 className="text-xl font-bold text-gray-100 flex-1">Menu</h1>
           )}
           <button
-            onClick={() => {
-              setIsMenuOpen(!isMenuOpen);
-              if (!isMenuOpen) setIsReportsOpen(false);
-            }}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 rounded-lg hover:bg-gray-800 text-gray-400"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -73,49 +71,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               {isMenuOpen && <span className="ml-3 font-medium">{item.name}</span>}
             </Link>
           ))}
-
-          {/* Reports Section */}
-          <div className="pt-4 border-t border-gray-800">
-            <button
-              onClick={() => isMenuOpen && setIsReportsOpen(!isReportsOpen)}
-              className={`flex items-center w-full p-3 rounded-lg ${
-                pathname.includes("/reports")
-                  ? "bg-indigo-900/50 text-indigo-400"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-gray-100"
-              }`}
-            >
-              <div className="flex items-center flex-1">
-                <BarChart2 className={`h-5 w-5 ${pathname.includes("/reports") ? "text-indigo-400" : "text-gray-500"}`} />
-                {isMenuOpen && <span className="ml-3 font-medium">Reports</span>}
-              </div>
-              {isMenuOpen && (
-                <div className="text-gray-500">
-                  {isReportsOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </div>
-              )}
-            </button>
-
-            {isReportsOpen && isMenuOpen && (
-              <div className="ml-4 mt-2 space-y-1">
-                {[
-                  { name: "Purchase Records", path: "/reports/purchase-reports" },
-                  { name: "Sales Records", path: "/reports/sales-reports" },
-                ].map((report) => (
-                  <Link
-                    key={report.path}
-                    href={report.path}
-                    className={`block px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      pathname === report.path
-                        ? "bg-indigo-900/50 text-indigo-400"
-                        : "text-gray-400 hover:bg-gray-800 hover:text-gray-100"
-                    }`}
-                  >
-                    {report.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
         </nav>
       </div>
 
