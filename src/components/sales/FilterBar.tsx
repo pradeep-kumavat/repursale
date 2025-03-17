@@ -63,11 +63,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
         </select>
       </div>
 
-      <div className="md:w-30">
+      <div className="md:w-30 relative">
+        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         <select
           value={selectedMonth}
           onChange={onMonthChange}
-          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 transition-all duration-300"
+          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 transition-all duration-300 pl-10"
         >
           <option value="">All Months</option>
           <option value="1">January</option>
