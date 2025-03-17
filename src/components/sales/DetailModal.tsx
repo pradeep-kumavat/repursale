@@ -100,11 +100,11 @@ const DetailModal: React.FC<DetailModalProps> = ({ buyer, onClose }) => {
                 <tbody className="bg-blue-900 divide-y divide-blue-800">
                   {buyer.products.map((product, index) => (
                     <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{product.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{product.hsn}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{product.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{product.hsnCode}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-right">{product.quantity}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-right">₹{Number(product.rate).toLocaleString("en-IN")}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-right">₹{Number(product.amount).toLocaleString("en-IN")}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-right">₹{Number(product.taxableAmount).toLocaleString("en-IN")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -117,27 +117,15 @@ const DetailModal: React.FC<DetailModalProps> = ({ buyer, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="font-semibold text-blue-200">Taxable Value:</span>
-                  <span className="text-gray-100">₹{Number(buyer.value.taxableValue).toLocaleString("en-IN")}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
                   <span className="font-semibold text-blue-200">CGST Rate:</span>
                   <span className="text-gray-100">{buyer.value.cgst}%</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="font-semibold text-blue-200">CGST Amount:</span>
-                  <span className="text-gray-100">₹{Number(buyer.value.cgstValue).toLocaleString("en-IN")}</span>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-center py-2">
                   <span className="font-semibold text-blue-200">SGST Rate:</span>
                   <span className="text-gray-100">{buyer.value.sgst}%</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="font-semibold text-blue-200">SGST Amount:</span>
-                  <span className="text-gray-100">₹{Number(buyer.value.sgstValue).toLocaleString("en-IN")}</span>
-                </div>
+              </div>
+              <div>
                 <div className="flex justify-between items-center py-2">
                   <span className="font-semibold text-blue-200 text-lg">Total Amount:</span>
                   <span className="text-white font-bold text-lg">₹{Number(buyer.value.totalAmount).toLocaleString("en-IN")}</span>
