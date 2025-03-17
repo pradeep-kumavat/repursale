@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { PlusCircle, Save, ArrowRight } from 'lucide-react';
+import { Save, ArrowRight } from 'lucide-react';
 import FormSelect from './FormSelect';
 import BuyerDetailsSection, { BuyerData } from './BuyerDetailsSection';
 import InvoiceDetailsSection, { InvoiceData } from './InvoiceDetailsSection';
