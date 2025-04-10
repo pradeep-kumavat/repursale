@@ -3,15 +3,15 @@ import { NextResponse } from 'next/server';
 import Entries from "@/models/entryModel";
 import { currentUser } from "@clerk/nextjs/server";
 
-export default async function GET(req:Request) {
-    await dbConnect();
-
+export async function GET(req:Request) {
+  
   try {
     const user = await currentUser();
-
+    
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    await dbConnect();
 
 
     const salesData = await Entries
@@ -37,7 +37,7 @@ export default async function GET(req:Request) {
 
     return NextResponse.json({
       success: true,
-      totalSales,
+      data: totalSales,
     },
     { status: 200 });
 

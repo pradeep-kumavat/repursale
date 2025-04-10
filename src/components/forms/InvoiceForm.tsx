@@ -12,7 +12,7 @@ import FormButton from './FormButton';
 import { Product } from './ProductItem';
 
 interface InvoiceFormProps {
-  // You can add props here if needed
+ 
 }
 
 const InvoiceForm: React.FC<InvoiceFormProps> = () => {

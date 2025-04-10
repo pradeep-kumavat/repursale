@@ -8,7 +8,6 @@ import {
   Package, 
   FileText,
   TrendingUp,
-  DollarSign
 } from "lucide-react";
 import { CompanyDetailsPopup } from "@/components/CompanyDetailsPopup"; 
 
@@ -19,8 +18,56 @@ interface DashboardProps {
 export default function DashboardLayout({ children }: DashboardProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [totalSales, setTotalSales] = useState<number | null>(null);
+  const [totalPurchase, setTotalPurchase] = useState<number | null>(null);
+  const [salesGrowth, setSalesGrowth] = useState<number | null>(null);
+  const [purchaseGrowth, setPurchaseGrowth] = useState<number | null>(null);
   
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch total sales
+        const salesResponse = await fetch('/api/getTotalSales');
+        if (salesResponse.status === 200) {
+          const salesData = await salesResponse.json();
+          if (salesData.success) {
+            setTotalSales(salesData.data);
+          }
+        }
+
+        // Fetch total purchase
+        const purchaseResponse = await fetch('/api/getTotalPurchase');
+        if (purchaseResponse.status === 200) {
+          const purchaseData = await purchaseResponse.json();
+          if (purchaseData.success) {
+            setTotalPurchase(purchaseData.data);
+          }
+        }
+        
+        // Fetch monthly sales growth
+        const monthlySalesResponse = await fetch('/api/getMonthlySales');
+        if (monthlySalesResponse.status === 200) {
+          const monthlySalesData = await monthlySalesResponse.json();
+          if (monthlySalesData.success) {
+            setSalesGrowth(monthlySalesData.growthPercentage);
+          }
+        }
+        
+        // Fetch monthly purchase growth
+        const monthlyPurchaseResponse = await fetch('/api/getMonthlyPurchase');
+        if (monthlyPurchaseResponse.status === 200) {
+          const monthlyPurchaseData = await monthlyPurchaseResponse.json();
+          if (monthlyPurchaseData.success) {
+            setPurchaseGrowth(monthlyPurchaseData.growthPercentage);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+
     // Check if this is the first time after login/signup
     const hasSeenPopup = localStorage.getItem('hasCompletedCompanyDetails');
     
@@ -31,7 +78,6 @@ export default function DashboardLayout({ children }: DashboardProps) {
   }, []);
 
   const handlePopupSubmit = (data: any) => {
-    
     // Set flag to indicate user has completed the form
     localStorage.setItem('hasCompletedCompanyDetails', 'true');
     
@@ -39,7 +85,6 @@ export default function DashboardLayout({ children }: DashboardProps) {
     setShowPopup(false);
     
     // Additional logic for form submission (e.g., API call to save data)
-    
     console.log('Company details submitted:', data);
   };
 
@@ -50,9 +95,32 @@ export default function DashboardLayout({ children }: DashboardProps) {
     setShowPopup(false);
   };
 
+  // Format growth percentage with + or - sign
+  const formatGrowthPercentage = (percentage: number | null): string => {
+    if (percentage === null) return "0%";
+    const sign = percentage >= 0 ? "+" : "";
+    return `${sign}${percentage.toFixed(1)}%`;
+  };
+
+  // Determine color based on growth percentage
+  const getGrowthColor = (percentage: number | null): string => {
+    if (percentage === null) return "text-gray-400";
+    return percentage >= 0 ? "text-green-400" : "text-red-400";
+  };
+
   const stats = [
-    { label: "Total Sales", value: "₹45,231", trend: "+12.5%", color: "text-green-400" },
-    { label: "Total Purchase", value: "₹32,845", trend: "+8.2%", color: "text-blue-400" },
+    { 
+      label: "Total Purchase", 
+      value: totalPurchase !== null ? `₹${totalPurchase.toLocaleString('en-IN')}` : "₹0", 
+      growth: formatGrowthPercentage(purchaseGrowth), 
+      color: getGrowthColor(purchaseGrowth)
+    },
+    { 
+      label: "Total Sales", 
+      value: totalSales !== null ? `₹${totalSales.toLocaleString('en-IN')}` : "₹0", 
+      growth: formatGrowthPercentage(salesGrowth), 
+      color: getGrowthColor(salesGrowth)
+    },
   ];
 
   const cards = [
@@ -117,14 +185,14 @@ export default function DashboardLayout({ children }: DashboardProps) {
                   </div>
                   <div className={`flex items-center ${stat.color}`}>
                     <TrendingUp className="w-4 h-4 mr-1" />
-                    <span>{stat.trend}</span>
+                    <span>{stat.growth}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Main Content */}
+          
           {children ? (
             children
           ) : (
@@ -182,7 +250,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
         </div>
       </main>
 
-      {/* Company Details Popup */}
+      
       {showPopup && (
         <CompanyDetailsPopup 
           onClose={handlePopupClose} 
