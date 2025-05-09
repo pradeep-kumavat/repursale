@@ -16,8 +16,7 @@ export async function GET() {
     const entries = await Entries.find({ userId: user.id });
 
     const sanitizedEntries = entries.map(entry => {
-      const { userId, ...rest } = entry.toObject();
-      console.log(userId)
+      const { ...rest } = entry.toObject();
       return rest;
     });
 

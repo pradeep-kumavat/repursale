@@ -4,8 +4,10 @@ import axios from 'axios';
 
 
 type AvailableProduct = {
+  hsnCode: string;
   description: string;
   availableQuantity: number;
+
 };
 
 
@@ -64,7 +66,8 @@ const AvailableStockPage = () => {
       setFilteredProducts(availableProducts);
     } else {
       const filtered = availableProducts.filter(product => 
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.hsnCode.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredProducts(filtered);
     }
@@ -129,6 +132,7 @@ const AvailableStockPage = () => {
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                         Product Description
                       </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">HSN Code</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                         Available Quantity
                       </th>
@@ -144,6 +148,7 @@ const AvailableStockPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-medium">
                           {product.description}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-mono">{product.hsnCode}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
                           <span className="bg-gray-600 px-3 py-1 rounded-full font-mono">
                             {product.availableQuantity}

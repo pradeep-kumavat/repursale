@@ -12,31 +12,30 @@ export async function GET() {
 
     await dbConnect();
 
-    
     const purchaseData = await Entries.find({ userId: user.id, type: 'purchase' }).exec();
     const saleData = await Entries.find({ userId: user.id, type: 'sale' }).exec();
 
     const purchaseProducts = purchaseData.map(entry => entry.products).flat();
     const saleProducts = saleData.map(entry => entry.products).flat();
 
+    // Collect all sold HSN codes
+    const soldHsnCodes = new Set(saleProducts.map(product => product.hsnCode));
+
     const stockMap = new Map();
 
+    // Include only purchased products with HSN not sold
     purchaseProducts.forEach(product => {
-      const { description, quantity } = product;
-      const currentQuantity = stockMap.get(description) || 0;
-      stockMap.set(description, currentQuantity + parseInt(quantity, 10));
-    });
-
-    saleProducts.forEach(product => {
-      const { description, quantity } = product;
-      if (stockMap.has(description)) {
-        const currentQuantity = stockMap.get(description);
-        stockMap.set(description, currentQuantity - parseInt(quantity, 10));
+      const { hsnCode, description, quantity } = product;
+      if (!soldHsnCodes.has(hsnCode)) {
+        const current = stockMap.get(hsnCode) || { description, quantity: 0 };
+        current.quantity += parseInt(quantity, 10);
+        stockMap.set(hsnCode, current);
       }
     });
 
     const availableStock = Array.from(stockMap.entries())
-      .map(([description, quantity]) => ({
+      .map(([hsnCode, { description, quantity }]) => ({
+        hsnCode,
         description,
         availableQuantity: quantity
       }))
@@ -46,7 +45,7 @@ export async function GET() {
       success: true,
       data: availableStock,
     }, { status: 200 });
-    
+
   } catch (error) {
     console.error('Error calculating available stock:', error);
     return NextResponse.json({
