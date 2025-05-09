@@ -7,7 +7,6 @@ import {
   ShoppingCart, 
   Package, 
   FileText,
-  TrendingUp,
 } from "lucide-react";
 import { CompanyDetailsPopup } from "@/components/CompanyDetailsPopup"; 
 
