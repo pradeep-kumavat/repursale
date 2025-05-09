@@ -43,7 +43,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           value={filter}
           onChange={onFilterChange}
           placeholder="Search by name, GST, place, or invoice"
-          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 placeholder-gray-400 transition-all duration-300 pl-10"
+          className="w-full p-3 border-2 border-gray-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent text-white bg-gray-900/50 placeholder-gray-400 transition-all duration-300 pl-10"
         />
       </div>
 
@@ -52,7 +52,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <select
           value={selectedYear}
           onChange={onYearChange}
-          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 transition-all duration-300 pl-10"
+          className="w-full p-3 border-2 border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent text-white bg-gray-900/50 transition-all duration-300 pl-10"
         >
           <option value="">All Years</option>
           {years.map((year) => (
@@ -68,7 +68,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <select
           value={selectedMonth}
           onChange={onMonthChange}
-          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 transition-all duration-300 pl-10"
+          className="w-full p-3 border-2 border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent text-white bg-gray-900/50 transition-all duration-300 pl-10"
         >
           <option value="">All Months</option>
           <option value="1">January</option>
@@ -91,7 +91,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <select
           value={entriesPerPage}
           onChange={onEntriesPerPageChange}
-          className="w-full p-3 border-2 border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent text-white bg-blue-900/50 transition-all duration-300 pl-10"
+          className="w-full p-3 border-2 border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent text-white bg-gray-900/50 transition-all duration-300 pl-10"
         >
           <option value="10">10 entries</option>
           <option value="25">25 entries</option>
@@ -102,7 +102,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
       <button
         onClick={onExportClick}
-        className="md:w-48 p-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+        className="md:w-48 p-3 bg-teal-800 text-white rounded-xl hover:bg-teal-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         disabled={selectedEntriesCount === 0}
       >
         <Download size={20} />

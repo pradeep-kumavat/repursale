@@ -146,9 +146,9 @@ const PurchaseTable: React.FC = () => {
           )}
 
           {!loading && !error && (
-            <div className="bg-blue-900 rounded-2xl shadow-2xl overflow-hidden border border-blue-800">
+            <div className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-blue-800">
+                <table className="min-w-full divide-y divide-gray-800">
                   <TableHeader 
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -156,7 +156,7 @@ const PurchaseTable: React.FC = () => {
                     allSelected={selectedEntries.size === sortedAndFilteredBuyers.length}
                     hasEntries={sortedAndFilteredBuyers.length > 0}
                   />
-                  <tbody className="bg-blue-900 divide-y divide-blue-800">
+                  <tbody className="bg-gray-900 divide-y divide-gray-800">
                     {sortedAndFilteredBuyers
                       .slice(0, parseInt(entriesPerPage))
                       .map((buyer) => (
@@ -172,7 +172,7 @@ const PurchaseTable: React.FC = () => {
                       <tr>
                         <td 
                           colSpan={7} 
-                          className="px-6 py-8 text-center text-gray-400 bg-blue-900"
+                          className="px-6 py-8 text-center text-gray-400 bg-gray-900"
                         >
                           No matching records found.
                         </td>

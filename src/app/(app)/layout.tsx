@@ -38,7 +38,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex bg-gray-950 text-gray-100">
       {/* Sidebar */}
       <div
-        className={`flex flex-col bg-gray-900 border-r border-gray-800 ${
+        className={`flex flex-col bg-gray-950 border-r border-gray-800 ${
           isMenuOpen ? "w-72" : "w-20"
         } transition-all duration-300 shadow-xl`}
       >
@@ -77,7 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 bg-gray-900 border-b border-gray-800 px-6 flex items-center justify-between">
+        <header className="h-16 bg-gray-950 border-b border-gray-800 px-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <span className="font-medium text-gray-100">
               {user?.fullName ?? "Loading..."}
@@ -85,9 +85,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-lg hover:bg-gray-800 text-gray-400">
-              <Bell className="h-5 w-5" />
-            </button>
             
             <SignOutButton>
               <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900">

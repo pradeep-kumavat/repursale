@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode, useEffect } from "react";
+import { useState, type ReactNode, useEffect, useRef } from "react";
 import Link from "next/link";
 import { 
   ChevronRight, 
@@ -22,6 +22,16 @@ export default function DashboardLayout({ children }: DashboardProps) {
   const [totalPurchase, setTotalPurchase] = useState<number | null>(null);
   const [salesGrowth, setSalesGrowth] = useState<number | null>(null);
   const [purchaseGrowth, setPurchaseGrowth] = useState<number | null>(null);
+  
+  // State for animated counters
+  const [animatedSales, setAnimatedSales] = useState(0);
+  const [animatedPurchase, setAnimatedPurchase] = useState(0);
+  
+  // Track if data has loaded
+  const [dataLoaded, setDataLoaded] = useState(false);
+  
+  // Animation duration in milliseconds
+  const animationDuration = 1500;
   
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +71,9 @@ export default function DashboardLayout({ children }: DashboardProps) {
             setPurchaseGrowth(monthlyPurchaseData.growthPercentage);
           }
         }
+        
+        // Mark data as loaded to trigger animations
+        setDataLoaded(true);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -76,6 +89,52 @@ export default function DashboardLayout({ children }: DashboardProps) {
       setShowPopup(true);
     }
   }, []);
+  
+  // Animation effect for counters
+  useEffect(() => {
+    if (!dataLoaded) return;
+    
+    const finalSalesValue = totalSales || 0;
+    const finalPurchaseValue = totalPurchase || 0;
+    
+    // Reset counters to 0
+    setAnimatedSales(0);
+    setAnimatedPurchase(0);
+    
+    // Calculate step size based on animation duration and frame rate
+    const frameDuration = 16; // ~60fps
+    const totalFrames = animationDuration / frameDuration;
+    const salesStep = finalSalesValue / totalFrames;
+    const purchaseStep = finalPurchaseValue / totalFrames;
+    
+    let currentSales = 0;
+    let currentPurchase = 0;
+    let frameCount = 0;
+    
+    // Start animation
+    const animationInterval = setInterval(() => {
+      frameCount++;
+      
+      // Calculate current values with easing (ease-out cubic)
+      const progress = frameCount / totalFrames;
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      
+      currentSales = Math.min(finalSalesValue, Math.round(finalSalesValue * easedProgress));
+      currentPurchase = Math.min(finalPurchaseValue, Math.round(finalPurchaseValue * easedProgress));
+      
+      setAnimatedSales(currentSales);
+      setAnimatedPurchase(currentPurchase);
+      
+      // Stop animation when complete
+      if (frameCount >= totalFrames) {
+        setAnimatedSales(finalSalesValue);
+        setAnimatedPurchase(finalPurchaseValue);
+        clearInterval(animationInterval);
+      }
+    }, frameDuration);
+    
+    return () => clearInterval(animationInterval);
+  }, [dataLoaded, totalSales, totalPurchase]);
 
   const handlePopupSubmit = (data: any) => {
     // Set flag to indicate user has completed the form
@@ -111,13 +170,13 @@ export default function DashboardLayout({ children }: DashboardProps) {
   const stats = [
     { 
       label: "Total Purchase", 
-      value: totalPurchase !== null ? `₹${totalPurchase.toLocaleString('en-IN')}` : "₹0", 
+      value: animatedPurchase, 
       growth: formatGrowthPercentage(purchaseGrowth), 
       color: getGrowthColor(purchaseGrowth)
     },
     { 
       label: "Total Sales", 
-      value: totalSales !== null ? `₹${totalSales.toLocaleString('en-IN')}` : "₹0", 
+      value: animatedSales, 
       growth: formatGrowthPercentage(salesGrowth), 
       color: getGrowthColor(salesGrowth)
     },
@@ -181,7 +240,9 @@ export default function DashboardLayout({ children }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-2xl font-bold text-white transition-all duration-200 ease-out">
+                      ₹{stat.value.toLocaleString('en-IN')}
+                    </p>
                   </div>
                   <div className={`flex items-center ${stat.color}`}>
                     <TrendingUp className="w-4 h-4 mr-1" />
