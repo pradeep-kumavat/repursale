@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import Entries from '@/models/entryModel';
 import { currentUser } from '@clerk/nextjs/server';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const user = await currentUser();
     if (!user) {

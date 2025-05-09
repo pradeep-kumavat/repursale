@@ -9,10 +9,8 @@ import {
   LayoutDashboard,
   BadgePlus,
   Package,
-  BarChart2,
   LogOut,
   Settings,
-  Bell,
   ShoppingCart,
   Receipt,
 } from "lucide-react";

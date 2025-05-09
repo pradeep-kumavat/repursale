@@ -10,7 +10,7 @@ interface MonthlyDataItem {
   monthYear: string;
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const user = await currentUser();
     

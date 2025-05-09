@@ -3,7 +3,7 @@ import dbConnect from "@/lib/dbConnect";
 import Entries from "@/models/entryModel";
 import { currentUser } from "@clerk/nextjs/server";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const user = await currentUser();
     if (!user) {
@@ -17,6 +17,7 @@ export async function GET(req: Request) {
 
     const sanitizedEntries = entries.map(entry => {
       const { userId, ...rest } = entry.toObject();
+      console.log(userId)
       return rest;
     });
 

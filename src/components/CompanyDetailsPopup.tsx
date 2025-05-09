@@ -39,16 +39,6 @@ export function CompanyDetailsPopup({ onClose, onSubmit }: CompanyDetailsPopupPr
     return () => clearTimeout(timer);
   }, []);
 
-interface FormData {
-    companyName: string;
-    address: string;
-    city: string;
-    state: string;
-    pincode: string;
-    gstin: string;
-    email: string;
-    phone: string;
-}
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

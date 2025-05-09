@@ -11,11 +11,8 @@ import TaxDetailsSection, { TaxData } from './TaxDetailsSection';
 import FormButton from './FormButton';
 import { Product } from './ProductItem';
 
-interface InvoiceFormProps {
- 
-}
 
-const InvoiceForm: React.FC<InvoiceFormProps> = () => {
+const InvoiceForm = () => {
   // Form state
   const [invoiceType, setInvoiceType] = useState<string>('');
   

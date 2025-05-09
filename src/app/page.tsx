@@ -8,14 +8,12 @@ import Link from "next/link"
 export default function LandingPage() {
   const { isSignedIn } = useAuth()
   const router = useRouter()
-  const [isVisible, setIsVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     if (isSignedIn) {
       router.push("/dashboard")
     }
-    setIsVisible(true)
 
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
@@ -114,7 +112,7 @@ export default function LandingPage() {
                   icon: "⏱️",
                   description: "Streamline your record-keeping process and focus on growing your business.",
                 },
-              ].map((feature, index) => (
+              ].map((feature) => (
                 <div
                   key={feature.title}
                   className="group bg-gray-800/50 p-8 rounded-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-blue-600/10 hover:bg-gray-800 hover:-translate-y-2"
@@ -145,7 +143,7 @@ export default function LandingPage() {
                 { step: 1, title: "Sign Up", description: "Create your account in minutes" },
                 { step: 2, title: "Input Data", description: "Easily enter your purchases and sales data" },
                 { step: 3, title: "Analyze", description: "Get powerful insights for your business" },
-              ].map((item, index) => (
+              ].map((item) => (
                 <div
                   key={item.step}
                   className="group text-center"
@@ -191,7 +189,7 @@ export default function LandingPage() {
                   className="group bg-gray-800/50 p-8 rounded-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-blue-600/10 hover:bg-gray-800 hover:-translate-y-2"
                 >
                   <p className="mb-6 text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
-                    "{testimonial.quote}"
+                    &quot;{testimonial.quote}&quot;
                   </p>
                   <p className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
                     {testimonial.author}

@@ -2,10 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-type ProductItem = {
-  description: string;
-  quantity: string;
-};
 
 type AvailableProduct = {
   description: string;

@@ -11,6 +11,7 @@ import {
   Camera,
   Loader2
 } from "lucide-react";
+import Image from "next/image";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
@@ -76,10 +77,12 @@ export default function SettingsPage() {
       <div className="mb-8 bg-gray-900 rounded-xl p-6 border border-gray-800">
         <div className="flex items-center space-x-6">
           <div className="relative">
-            <img
+            <Image
               src={user?.imageUrl || "/api/placeholder/100/100"}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover"
+              width={100}
+              height={100}
             />
             <button className="absolute bottom-0 right-0 p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors border border-gray-700">
               <Camera className="w-4 h-4 text-gray-300" />

@@ -5,7 +5,7 @@ import axios from "axios"
 import { BookOpen, Mail, Phone, MapPin, Send } from "lucide-react"
 import Link from "next/link"
 
-export default function contact() {
+export default function Contact() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -14,24 +14,27 @@ export default function contact() {
     message: ""
   })
 
-const handleSubmit = async () => {
-  try {
-    if (!formData.name || !formData.email || !formData.message || !formData.subject) {
-      toast.error("All fields are required")
-      return;
-    }
-    if (!loading) {
-      const toastId = toast.loading("Sending message...")
-      const response = await axios.post("/api/send-msg", formData)
-      toast.dismiss(toastId)
-      toast.success("Message sent successfully")
+  const handleSubmit = async () => {
+    try {
+      if (!formData.name || !formData.email || !formData.message || !formData.subject) {
+        toast.error("All fields are required")
+        return;
+      }
+      if (!loading) {
+        const toastId = toast.loading("Sending message...")
+        const response = await axios.post("/api/send-msg", formData)
+        console.log(response)
+        toast.dismiss(toastId)
+        toast.success("Message sent successfully")
+        setFormData({ name: "", email: "", subject: "", message: "" })
+        setLoading(false)
+      }
+    } catch (error: unknown) {
+      toast.error("Failed to send message")
+      console.log(error)
       setFormData({ name: "", email: "", subject: "", message: "" })
     }
-  } catch (error: unknown) {
-    toast.error("Failed to send message")
-    setFormData({ name: "", email: "", subject: "", message: "" })
   }
-}
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100">
@@ -57,7 +60,7 @@ const handleSubmit = async () => {
               <div>
                 <h2 className="text-2xl font-semibold mb-6 text-blue-400">Get in Touch</h2>
                 <p className="text-gray-300 leading-relaxed mb-8">
-                  Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                  Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
                 </p>
               </div>
 

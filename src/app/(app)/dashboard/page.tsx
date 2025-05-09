@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   ChevronRight, 
@@ -11,11 +11,8 @@ import {
 } from "lucide-react";
 import { CompanyDetailsPopup } from "@/components/CompanyDetailsPopup"; 
 
-interface DashboardProps {
-  children: ReactNode;
-}
 
-export default function DashboardLayout({ children }: DashboardProps) {
+export default function DashboardLayout() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [totalSales, setTotalSales] = useState<number | null>(null);
@@ -60,6 +57,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
           const monthlySalesData = await monthlySalesResponse.json();
           if (monthlySalesData.success) {
             setSalesGrowth(monthlySalesData.growthPercentage);
+              console.log(monthlySalesData.growthPercentage)
           }
         }
         
@@ -69,6 +67,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
           const monthlyPurchaseData = await monthlyPurchaseResponse.json();
           if (monthlyPurchaseData.success) {
             setPurchaseGrowth(monthlyPurchaseData.growthPercentage);
+            console.log(monthlyPurchaseData.growthPercentage)
           }
         }
         
@@ -104,8 +103,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
     // Calculate step size based on animation duration and frame rate
     const frameDuration = 16; // ~60fps
     const totalFrames = animationDuration / frameDuration;
-    const salesStep = finalSalesValue / totalFrames;
-    const purchaseStep = finalPurchaseValue / totalFrames;
+
     
     let currentSales = 0;
     let currentPurchase = 0;
@@ -136,7 +134,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
     return () => clearInterval(animationInterval);
   }, [dataLoaded, totalSales, totalPurchase]);
 
-  const handlePopupSubmit = (data: any) => {
+  const handlePopupSubmit = (data: unknown) => {
     // Set flag to indicate user has completed the form
     localStorage.setItem('hasCompletedCompanyDetails', 'true');
     
@@ -156,9 +154,8 @@ export default function DashboardLayout({ children }: DashboardProps) {
 
   // Format growth percentage with + or - sign
   const formatGrowthPercentage = (percentage: number | null): string => {
-    if (percentage === null) return "0%";
-    const sign = percentage >= 0 ? "+" : "";
-    return `${sign}${percentage.toFixed(1)}%`;
+    if (percentage === null) return "0";
+    return `${percentage.toFixed(1)}%`;
   };
 
   // Determine color based on growth percentage
@@ -230,7 +227,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
           {/* Header Section */}
           <div className="flex flex-col space-y-2">
             <h1 className="text-3xl font-bold text-white">Welcome!!!</h1>
-            <p className="text-gray-400">Here's an overview of your business</p>
+            <p className="text-gray-400">Here&apos;s an overview of your business</p>
           </div>
 
           {/* Stats Section */}
@@ -245,8 +242,8 @@ export default function DashboardLayout({ children }: DashboardProps) {
                     </p>
                   </div>
                   <div className={`flex items-center ${stat.color}`}>
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    <span>{stat.growth}</span>
+                    {/* <TrendingUp className="w-4 h-4 mr-1" />
+                    <span>{stat.growth}</span> */}
                   </div>
                 </div>
               </div>
@@ -254,9 +251,6 @@ export default function DashboardLayout({ children }: DashboardProps) {
           </div>
 
           
-          {children ? (
-            children
-          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {cards.map((card, index) => (
                 <div
@@ -307,7 +301,7 @@ export default function DashboardLayout({ children }: DashboardProps) {
                 </div>
               ))}
             </div>
-          )}
+
         </div>
       </main>
 
