@@ -37,4 +37,28 @@ export interface TotalsData {
   totalCGST: number;
   totalSGST: number;
   totalInvoiceValue: number;
-} 
+}
+
+// Inventory related types
+export interface AvailableProduct {
+  hsnCode: string;
+  description: string;
+  availableQuantity: number;
+}
+
+export interface StockItem {
+  description: string;
+  quantity: number;
+}
+
+export interface ApiSuccessResponse<T = any> {
+  success: true;
+  data: T;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: string;
+}
+
+export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse; 

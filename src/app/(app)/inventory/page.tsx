@@ -1,14 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
-
-type AvailableProduct = {
-  hsnCode: string;
-  description: string;
-  availableQuantity: number;
-
-};
+import { AvailableProduct, ApiResponse } from '@/components/types';
 
 
 const tailwindAnimations = `
@@ -38,8 +31,8 @@ const AvailableStockPage = () => {
   useEffect(() => {
     const fetchAvailableStock = async () => {
       try {
-        const response = await axios.get('/api/getAvailableStock');
-        const data = response.data;
+        const response = await axios.get<ApiResponse<AvailableProduct[]>>('/api/getAvailableStock');
+        const data: ApiResponse<AvailableProduct[]> = response.data;
         
         if (data.success) {
           setAvailableProducts(data.data);
@@ -47,7 +40,7 @@ const AvailableStockPage = () => {
         } else {
           setError(data.error || 'Failed to fetch available stock');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching available stock:', error);
         setError('Failed to load available stock data');
       } finally {
