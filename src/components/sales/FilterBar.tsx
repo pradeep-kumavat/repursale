@@ -102,7 +102,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
       <button
         onClick={onExportClick}
-        className="md:w-48 p-3 bg-teal-800 text-white rounded-xl hover:bg-teal-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+        className="md:w-48 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={selectedEntriesCount === 0}
       >
         <Download size={20} />

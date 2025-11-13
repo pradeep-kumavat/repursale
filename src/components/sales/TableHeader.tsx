@@ -78,6 +78,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({
         >
           Amount <SortIcon column="totalAmount" />
         </th>
+        <th className="px-6 py-4 text-sm font-semibold tracking-wider">
+          Actions
+        </th>
       </tr>
     </thead>
   );

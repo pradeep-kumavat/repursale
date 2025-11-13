@@ -1,8 +1,8 @@
-"use client"
-import React, { useEffect, useState } from 'react';
+"use client";
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { Search, Package, Boxes, Clock } from 'lucide-react';
 import { AvailableProduct, ApiResponse } from '@/components/types';
-
 
 const tailwindAnimations = `
 @keyframes fadeIn {
@@ -14,12 +14,6 @@ const tailwindAnimations = `
 }
 `;
 
-const tailwindExtensions = `
-.bg-blue-750 {
-  background-color: #1a4b8c;
-}
-`;
-
 const AvailableStockPage = () => {
   const [availableProducts, setAvailableProducts] = useState<AvailableProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<AvailableProduct[]>([]);
@@ -27,6 +21,8 @@ const AvailableStockPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [footerTimestamp, setFooterTimestamp] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAvailableStock = async () => {
@@ -37,6 +33,7 @@ const AvailableStockPage = () => {
         if (data.success) {
           setAvailableProducts(data.data);
           setFilteredProducts(data.data);
+          setLastUpdated(new Date());
         } else {
           setError(data.error || 'Failed to fetch available stock');
         }
@@ -66,84 +63,183 @@ const AvailableStockPage = () => {
     }
   }, [searchTerm, availableProducts]);
 
+  const totalDistinctProducts = filteredProducts.length;
+  const totalQuantity = useMemo(
+    () => filteredProducts.reduce((sum, product) => sum + Number(product.availableQuantity || 0), 0),
+    [filteredProducts]
+  );
+  const uniqueHsnCodes = useMemo(
+    () => new Set(filteredProducts.map((product) => product.hsnCode)).size,
+    [filteredProducts]
+  );
+
+  const formattedTimestamp = lastUpdated
+    ? new Intl.DateTimeFormat('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(lastUpdated)
+    : null;
+
+  useEffect(() => {
+    if (!lastUpdated) {
+      return;
+    }
+    const formattedFooter = new Intl.DateTimeFormat('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(lastUpdated);
+    setFooterTimestamp(formattedFooter);
+  }, [lastUpdated]);
+
+  const renderSkeletonRows = () =>
+    Array.from({ length: 6 }).map((_, index) => (
+      <tr key={index} className="animate-pulse">
+        <td className="px-6 py-4">
+          <div className="h-4 bg-blue-800/30 rounded w-3/4" />
+        </td>
+        <td className="px-6 py-4">
+          <div className="h-4 bg-blue-800/30 rounded w-24" />
+        </td>
+        <td className="px-6 py-4">
+          <div className="h-4 bg-blue-800/30 rounded w-16" />
+        </td>
+      </tr>
+    ));
+
   return (
     <>
       <style jsx global>{tailwindAnimations}</style>
-      <style jsx global>{tailwindExtensions}</style>
-      <div className="min-h-screen bg-gray-950 p-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 text-white tracking-wide border-b-2 border-blue-400 pb-2 inline-block">
+      <div className="min-h-screen bg-gray-950 px-6 py-10">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex flex-col gap-3">
+            <span className="text-xs uppercase tracking-[0.3em] text-blue-400">Inventory</span>
+            <h1 className="text-3xl md:text-4xl font-semibold text-white">
             Available Stock
           </h1>
+            <p className="text-sm text-blue-200/80 max-w-2xl">
+              Track real-time product availability, filter by description or HSN code, and monitor inventory strength across your catalogue.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-2xl border border-blue-800 bg-blue-950/50 p-5 backdrop-blur-sm shadow-[0_20px_45px_-25px_rgba(30,64,175,0.45)]">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-blue-200/80">Total SKUs</div>
+                <div className="rounded-xl bg-blue-800/60 p-2 text-blue-100">
+                  <Package size={18} />
+                </div>
+              </div>
+              <p className="mt-3 text-2xl font-semibold text-white">{availableProducts.length}</p>
+              <span className="text-xs text-blue-300/80">Across the full inventory</span>
+            </div>
+
+            <div className="rounded-2xl border border-blue-800 bg-blue-950/50 p-5 backdrop-blur-sm shadow-[0_20px_45px_-25px_rgba(30,64,175,0.45)]">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-blue-200/80">On-hand Quantity</div>
+                <div className="rounded-xl bg-blue-800/60 p-2 text-blue-100">
+                  <Boxes size={18} />
+                </div>
+              </div>
+              <p className="mt-3 text-2xl font-semibold text-white">{totalQuantity.toLocaleString('en-IN')}</p>
+              <span className="text-xs text-blue-300/80">Sum of current stock units</span>
+            </div>
+
+            <div className="rounded-2xl border border-blue-800 bg-blue-950/50 p-5 backdrop-blur-sm shadow-[0_20px_45px_-25px_rgba(30,64,175,0.45)]">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-blue-200/80">HSN Coverage</div>
+                <div className="rounded-xl bg-blue-800/60 p-2 text-blue-100">
+                  <Clock size={18} />
+                </div>
+              </div>
+              <p className="mt-3 text-2xl font-semibold text-white">{uniqueHsnCodes}</p>
+              <span className="text-xs text-blue-300/80">Unique HSN codes in view</span>
+            </div>
+          </div>
           
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-pulse flex flex-col items-center">
-                <div className="w-16 h-16 border-4 border-gray-300 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-blue-100">Loading inventory data...</p>
+            <div className="rounded-2xl border border-blue-900/80 bg-blue-950/40 shadow-2xl overflow-hidden">
+              <div className="border-b border-blue-900/70 bg-blue-950/60 px-6 py-5">
+                <div className="flex items-center gap-3 text-blue-200">
+                  <div className="h-9 w-9 animate-spin rounded-full border-2 border-blue-300/70 border-t-transparent" />
+                  <div>
+                    <p className="text-sm font-medium">Fetching inventory snapshot</p>
+                    <p className="text-xs text-blue-300/70">Please hold on while we synchronise your stock data.</p>
+                  </div>
+                </div>
               </div>
+              <table className="min-w-full">
+                <tbody className="divide-y divide-blue-900/60 bg-blue-950/30">
+                  {renderSkeletonRows()}
+                </tbody>
+              </table>
             </div>
           ) : error ? (
-            <div className="bg-red-800 border border-red-600 text-red-100 px-6 py-4 rounded-lg shadow-lg animate-fadeIn">
-              <p className="flex items-center">
-                <span className="mr-2">⚠️</span>
-                {error}
+            <div className="rounded-2xl border border-red-800/70 bg-red-950/40 p-6 text-red-100 shadow-2xl animate-fadeIn">
+              <p className="text-sm font-medium">{error}</p>
+              <p className="mt-1 text-xs text-red-200/80">
+                Please retry in a few moments or contact your administrator if the issue persists.
               </p>
             </div>
           ) : availableProducts.length === 0 ? (
-            <div className="bg-yellow-700 border border-yellow-600 text-yellow-100 px-6 py-4 rounded-lg shadow-lg animate-fadeIn">
-              <p className="flex items-center">
-                <span className="mr-2">📦</span>
-                No available stock found.
+            <div className="rounded-2xl border border-blue-800 bg-blue-950/40 p-6 text-blue-100 shadow-2xl animate-fadeIn">
+              <h2 className="text-lg font-semibold text-white">Inventory not configured</h2>
+              <p className="mt-2 text-sm text-blue-200/80">
+                Add purchase entries to start tracking items in stock. Once entries are recorded, you will see them reflected here instantly.
               </p>
             </div>
           ) : (
-            <div className={`bg-gray-800 border border-gray-700 shadow-xl overflow-hidden rounded-lg ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
-              <div className="p-4 bg-gray-800 flex justify-between items-center">
+            <div className={`bg-blue-900 border border-blue-800 shadow-2xl overflow-hidden rounded-2xl ${isVisible ? 'animate-fadeIn' : 'opacity-0'}`}>
+              <div className="p-5 bg-blue-900 flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-blue-700/60">
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                    </svg>
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-blue-300/80">
+                    <Search size={16} />
                   </div>
                   <input 
                     type="search" 
-                    className="block w-64 p-2 pl-10 text-sm text-gray-200 border border-gray-600 rounded-lg bg-gray-700 focus:ring-blue-500 focus:border-blue-500" 
+                    className="block w-full md:w-72 p-2.5 pl-10 text-sm text-blue-100 border border-blue-700/70 rounded-xl bg-blue-950/60 placeholder-blue-300/70 focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-colors" 
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="bg-gray-700 text-gray-200 px-3 py-1 rounded-full text-sm">
-                  <span className="font-medium">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'item' : 'items'} in stock
+                <div className="flex flex-col items-start gap-2 text-sm text-blue-200/90 md:items-end">
+                  <div className="rounded-full border border-blue-800 bg-blue-950/60 px-4 py-2 font-medium text-blue-100">
+                    {totalDistinctProducts} {totalDistinctProducts === 1 ? 'record' : 'records'} in view
+                  </div>
+                  {formattedTimestamp && (
+                    <span className="flex items-center gap-2 text-xs text-blue-300/70">
+                      <Clock size={14} />
+                      Last synchronised: {formattedTimestamp}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-600">
-                  <thead className="bg-gray-700">
+              <div className="overflow-x-auto bg-blue-950/40">
+                <table className="min-w-full divide-y divide-blue-800">
+                  <thead className="bg-blue-950/60">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-200 uppercase tracking-wider">
                         Product Description
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">HSN Code</th>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-200 uppercase tracking-wider">HSN Code</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-200 uppercase tracking-wider">
                         Available Quantity
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-600">
+                  <tbody className="divide-y divide-blue-800">
                     {filteredProducts.map((product, index) => (
                       <tr 
                         key={index} 
-                        className={`${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700'} animate-fadeIn`}
+                        className={`${index % 2 === 0 ? 'bg-blue-900/70' : 'bg-blue-950/70'} animate-fadeIn`}
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-100 font-medium">
                           {product.description}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-mono">{product.hsnCode}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
-                          <span className="bg-gray-600 px-3 py-1 rounded-full font-mono">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-200 font-mono">{product.hsnCode}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-100">
+                          <span className="bg-blue-800/60 px-3 py-1 rounded-full font-mono border border-blue-700">
                             {product.availableQuantity}
                           </span>
                         </td>
@@ -152,8 +248,8 @@ const AvailableStockPage = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="p-4 bg-gray-700 text-gray-300 text-sm italic text-right">
-                Last updated: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
+              <div className="p-4 bg-blue-950/70 text-blue-200 text-sm italic text-right border-t border-blue-800">
+                {footerTimestamp ? `Last updated: ${footerTimestamp}` : 'Synchronising inventory timeline...'}
               </div>
             </div>
           )}

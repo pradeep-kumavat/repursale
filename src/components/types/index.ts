@@ -9,6 +9,7 @@ export interface Product {
 
 export interface Buyer {
   _id: string;
+  userId: string;
   buyerName: string;
   mobileNumber: string;
   placeOfSupply: string;
