@@ -6,20 +6,22 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
 
-// Global cache for Next.js (avoids reconnecting on hot reload)
-declare global {
-  var _mongooseConn: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  } | undefined;
-}
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
 
-if (!global._mongooseConn) {
-  global._mongooseConn = { conn: null, promise: null };
+// Global cache for Next.js (avoids reconnecting on hot reload)
+const globalForMongoose = globalThis as typeof globalThis & {
+  _mongooseConn?: MongooseCache;
+};
+
+if (!globalForMongoose._mongooseConn) {
+  globalForMongoose._mongooseConn = { conn: null, promise: null };
 }
 
 export default async function dbConnect(): Promise<typeof mongoose> {
-  const cached = global._mongooseConn!;
+  const cached = globalForMongoose._mongooseConn!;
 
   // If connection already exists → return it
   if (cached.conn) return cached.conn;
