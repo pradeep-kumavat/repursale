@@ -6,10 +6,11 @@ import { generateInvoicePDF } from '@/lib/pdfGenerator';
 import { Buyer } from '@/components/types';
 import Entries from '@/models/entryModel';
 import { currentUser } from '@clerk/nextjs/server';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await currentUser();
@@ -23,13 +24,10 @@ export async function GET(
 
     await dbConnect();
     
-    // Handle params as Promise (Next.js 15+) or object (Next.js 13-14)
-    const resolvedParams = await Promise.resolve(params);
-    
     // Fetch invoice from MongoDB - only for the authenticated user
-    const { ObjectId } = require('mongodb');
+    const { id } = await params;
     const invoice = await Entries.findOne({
-      _id: new ObjectId(resolvedParams.id),
+      _id: new ObjectId(id),
       userId: user.id
     });
 
